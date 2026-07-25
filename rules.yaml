@@ -1,0 +1,79 @@
+- rule_id: WIN-SEC-001
+  category: "Lateral Movement"
+  description: "Ensure SMBv1 protocol is disabled (used by WannaCry/EternalBlue)"
+  ps_command: "Get-SmbServerConfiguration | Select-Object EnableSMB1Protocol | ConvertTo-Json"
+  target_key: "EnableSMB1Protocol"
+  expected_value: false
+  severity: "CRITICAL"
+
+- rule_id: WIN-SEC-002
+  category: "Privilege Escalation"
+  description: "Ensure User Account Control (UAC) is enabled"
+  ps_command: "Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' | Select-Object EnableLUA | ConvertTo-Json"
+  target_key: "EnableLUA"
+  expected_value: 1
+  severity: "HIGH"
+
+- rule_id: WIN-SEC-003
+  category: "Remote Access"
+  description: "Ensure RDP requires Network Level Authentication (NLA)"
+  ps_command: "Get-ItemProperty 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' | Select-Object UserAuthentication | ConvertTo-Json"
+  target_key: "UserAuthentication"
+  expected_value: 1
+  severity: "HIGH"
+
+- rule_id: WIN-SEC-004
+  category: "Defense Evasion"
+  description: "Ensure Windows Defender Real-Time Protection is active"
+  ps_command: "Get-MpComputerStatus | Select-Object RealTimeProtectionEnabled | ConvertTo-Json"
+  target_key: "RealTimeProtectionEnabled"
+  expected_value: true
+  severity: "CRITICAL"
+
+- rule_id: WIN-SEC-005
+  category: "Credential Protection"
+  description: "Ensure built-in Guest account is disabled"
+  ps_command: "Get-LocalUser -Name 'Guest' | Select-Object Enabled | ConvertTo-Json"
+  target_key: "Enabled"
+  expected_value: false
+  severity: "MEDIUM"
+
+- rule_id: WIN-SEC-006
+  category: "Network Security"
+  description: "Ensure Windows Firewall is enabled for the Domain profile"
+  ps_command: "Get-NetFirewallProfile -Name Domain | Select-Object Enabled | ConvertTo-Json"
+  target_key: "Enabled"
+  expected_value: 1
+  severity: "HIGH"
+
+- rule_id: WIN-SEC-007
+  category: "Credential Protection"
+  description: "Ensure LSA Protection (RunAsPPL) is enabled to prevent credential dumping"
+  ps_command: "Get-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa' | Select-Object RunAsPPL | ConvertTo-Json"
+  target_key: "RunAsPPL"
+  expected_value: 1
+  severity: "CRITICAL"
+
+- rule_id: WIN-SEC-008
+  category: "Execution Policy"
+  description: "Ensure PowerShell script execution policy is restricted"
+  ps_command: "Get-ExecutionPolicy | Select-Object @{Name='ExecutionPolicy';Expression={$_}} | ConvertTo-Json"
+  target_key: "ExecutionPolicy"
+  expected_value: "AllSigned"
+  severity: "MEDIUM"
+
+- rule_id: WIN-SEC-009
+  category: "Patch Management"
+  description: "Ensure Automatic Updates are not disabled via policy"
+  ps_command: "Get-ItemProperty 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU' -ErrorAction SilentlyContinue | Select-Object NoAutoUpdate | ConvertTo-Json"
+  target_key: "NoAutoUpdate"
+  expected_value: 0
+  severity: "MEDIUM"
+
+- rule_id: WIN-SEC-010
+  category: "Data Protection"
+  description: "Ensure BitLocker is fully encrypting the system drive (C:)"
+  ps_command: "Get-BitLockerVolume -MountPoint 'C:' | Select-Object VolumeStatus | ConvertTo-Json"
+  target_key: "VolumeStatus"
+  expected_value: "FullyEncrypted"
+  severity: "HIGH"
