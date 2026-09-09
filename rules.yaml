@@ -77,3 +77,83 @@
   target_key: "VolumeStatus"
   expected_value: "FullyEncrypted"
   severity: "HIGH"
+
+- rule_id: WIN-SEC-011
+  category: "Privilege Escalation"
+  description: "Ensure AlwaysInstallElevated is disabled (HKLM) — prevents SYSTEM-level MSI install abuse"
+  ps_command: "Get-ItemProperty 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer' -ErrorAction SilentlyContinue | Select-Object AlwaysInstallElevated | ConvertTo-Json"
+  target_key: "AlwaysInstallElevated"
+  expected_value: 0
+  severity: "CRITICAL"
+
+- rule_id: WIN-SEC-012
+  category: "Privilege Escalation"
+  description: "Ensure AlwaysInstallElevated is disabled (HKCU)"
+  ps_command: "Get-ItemProperty 'HKCU:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer' -ErrorAction SilentlyContinue | Select-Object AlwaysInstallElevated | ConvertTo-Json"
+  target_key: "AlwaysInstallElevated"
+  expected_value: 0
+  severity: "CRITICAL"
+
+- rule_id: WIN-SEC-013
+  category: "Credential Protection"
+  description: "Ensure WDigest does not cache plaintext credentials in memory"
+  ps_command: "Get-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -ErrorAction SilentlyContinue | Select-Object UseLogonCredential | ConvertTo-Json"
+  target_key: "UseLogonCredential"
+  expected_value: 0
+  severity: "CRITICAL"
+
+- rule_id: WIN-SEC-014
+  category: "Network Security"
+  description: "Ensure LLMNR (Link-Local Multicast Name Resolution) is disabled to prevent spoofing"
+  ps_command: "Get-ItemProperty 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient' -ErrorAction SilentlyContinue | Select-Object EnableMulticast | ConvertTo-Json"
+  target_key: "EnableMulticast"
+  expected_value: 0
+  severity: "HIGH"
+
+- rule_id: WIN-SEC-015
+  category: "Endpoint Hardening"
+  description: "Ensure AutoRun is disabled for all drives"
+  ps_command: "Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer' -ErrorAction SilentlyContinue | Select-Object NoDriveTypeAutoRun | ConvertTo-Json"
+  target_key: "NoDriveTypeAutoRun"
+  expected_value: 255
+  severity: "MEDIUM"
+
+- rule_id: WIN-SEC-016
+  category: "Endpoint Hardening"
+  description: "Ensure Windows Script Host (wscript/cscript) is disabled"
+  ps_command: "Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows Script Host\\Settings' -ErrorAction SilentlyContinue | Select-Object Enabled | ConvertTo-Json"
+  target_key: "Enabled"
+  expected_value: 0
+  severity: "MEDIUM"
+
+- rule_id: WIN-SEC-017
+  category: "Audit & Logging"
+  description: "Ensure PowerShell Script Block Logging is enabled"
+  ps_command: "Get-ItemProperty 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -ErrorAction SilentlyContinue | Select-Object EnableScriptBlockLogging | ConvertTo-Json"
+  target_key: "EnableScriptBlockLogging"
+  expected_value: 1
+  severity: "MEDIUM"
+
+- rule_id: WIN-SEC-018
+  category: "Account Security"
+  description: "Ensure built-in Administrator account is disabled"
+  ps_command: "Get-LocalUser -Name 'Administrator' | Select-Object Enabled | ConvertTo-Json"
+  target_key: "Enabled"
+  expected_value: false
+  severity: "HIGH"
+
+- rule_id: WIN-SEC-019
+  category: "Lateral Movement"
+  description: "Ensure SMB client requires security signature"
+  ps_command: "Get-SmbClientConfiguration | Select-Object RequireSecuritySignature | ConvertTo-Json"
+  target_key: "RequireSecuritySignature"
+  expected_value: true
+  severity: "HIGH"
+
+- rule_id: WIN-SEC-020
+  category: "Attack Surface"
+  description: "Ensure Print Spooler service is stopped on non-print servers (PrintNightmare)"
+  ps_command: "Get-Service -Name Spooler | Select-Object @{Name='Status';Expression={$_.Status.ToString()}} | ConvertTo-Json"
+  target_key: "Status"
+  expected_value: "Stopped"
+  severity: "HIGH"

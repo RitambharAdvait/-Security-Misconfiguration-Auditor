@@ -7,8 +7,8 @@ an HTML report (Jinja2). Zero external agents — no Nmap/Wireshark.
 ## Project Structure
 
     win-security-auditor/
-    ├── auditor.py
-    ├── rules.yaml
+    => auditor.py
+    | rules.yaml
     ├── templates/report_template.html
     ├── sample_output/audit_report.html
     ├── .gitignore

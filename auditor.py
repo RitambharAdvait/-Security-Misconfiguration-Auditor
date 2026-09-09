@@ -20,6 +20,16 @@ DEMO_RESPONSES = {
     "WIN-SEC-008": {"ExecutionPolicy": "RemoteSigned"},
     "WIN-SEC-009": {"NoAutoUpdate": 0},
     "WIN-SEC-010": {"VolumeStatus": "FullyDecrypted"},
+    "WIN-SEC-011": {"AlwaysInstallElevated": 0},
+    "WIN-SEC-012": {"AlwaysInstallElevated": 1},
+    "WIN-SEC-013": {"UseLogonCredential": 0},
+    "WIN-SEC-014": {"EnableMulticast": 1},
+    "WIN-SEC-015": {"NoDriveTypeAutoRun": 255},
+    "WIN-SEC-016": {"Enabled": 1},
+    "WIN-SEC-017": {"EnableScriptBlockLogging": 0},
+    "WIN-SEC-018": {"Enabled": False},
+    "WIN-SEC-019": {"RequireSecuritySignature": False},
+    "WIN-SEC-020": {"Status": "Running"},
 }
 
 def load_rules(path):
