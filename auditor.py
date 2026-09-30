@@ -9,6 +9,11 @@ from rich.panel import Panel
 
 console = Console()
 
+# ---------------------------------------------------------------------------
+# Severity weights for risk-weighted compliance scoring (mirrors CVSS/CCSS)
+# ---------------------------------------------------------------------------
+SEVERITY_WEIGHT = {"CRITICAL": 3, "HIGH": 2, "MEDIUM": 1, "LOW": 1}
+
 DEMO_RESPONSES = {
     "WIN-SEC-001": {"EnableSMB1Protocol": True},
     "WIN-SEC-002": {"EnableLUA": 1},
@@ -72,9 +77,18 @@ def run_powershell_demo(rule_id: str):
 def evaluate_rule(rule, demo=False):
     ok, payload = (run_powershell_demo(rule["rule_id"]) if demo else run_powershell(rule["ps_command"]))
     base = {
-        "rule_id": rule["rule_id"], "category": rule["category"],
-        "description": rule["description"], "severity": rule["severity"],
+        "rule_id": rule["rule_id"],
+        "category": rule["category"],
+        "description": rule["description"],
+        "severity": rule["severity"],
         "expected_value": rule["expected_value"],
+        # Remediation & risk metadata (defaults for backward-compat with old rules)
+        "risk_explanation": rule.get("risk_explanation", ""),
+        "remediation_command": rule.get("remediation_command", ""),
+        "cis_reference": rule.get("cis_reference", "N/A"),
+        "mitre_tactic": rule.get("mitre_tactic", "N/A"),
+        "mitre_technique": rule.get("mitre_technique", "N/A"),
+        "mitre_name": rule.get("mitre_name", "N/A"),
     }
     if not ok:
         base.update(status="ERROR", actual_value=None, error=payload)
@@ -95,38 +109,98 @@ def run_audit(rules, demo=False):
             progress.advance(task)
     return results
 
+# ---------------------------------------------------------------------------
+# Scoring helpers
+# ---------------------------------------------------------------------------
+
+def compute_scores(results):
+    """Return simple counts and risk-weighted compliance percentage."""
+    passed = sum(1 for r in results if r["status"] == "PASS")
+    failed = sum(1 for r in results if r["status"] == "FAIL")
+    errors = sum(1 for r in results if r["status"] == "ERROR")
+    total  = len(results)
+
+    # Simple percentage (backward-compatible)
+    simple_score = round((passed / total) * 100, 1) if total else 0
+
+    # Risk-weighted score: each rule's weight depends on its severity
+    weighted_earned = 0
+    weighted_possible = 0
+    for r in results:
+        w = SEVERITY_WEIGHT.get(r["severity"], 1)
+        weighted_possible += w
+        if r["status"] == "PASS":
+            weighted_earned += w
+    weighted_score = round((weighted_earned / weighted_possible) * 100, 1) if weighted_possible else 0
+
+    return {
+        "passed": passed, "failed": failed, "errors": errors, "total": total,
+        "simple_score": simple_score, "weighted_score": weighted_score,
+    }
+
+# ---------------------------------------------------------------------------
+# Terminal output
+# ---------------------------------------------------------------------------
+
 STATUS_STYLE = {"PASS": "[bold green]PASS[/bold green]", "FAIL": "[bold red]FAIL[/bold red]", "ERROR": "[bold yellow]ERROR[/bold yellow]"}
 
-def print_summary(results):
+def print_summary(results, scores):
     table = Table(title="Security Misconfiguration Audit Results", show_lines=False)
     table.add_column("Rule ID", style="dim"); table.add_column("Category")
     table.add_column("Description", overflow="fold"); table.add_column("Severity")
-    table.add_column("Status", justify="center")
+    table.add_column("MITRE", style="cyan"); table.add_column("Status", justify="center")
     for r in results:
         table.add_row(r["rule_id"], r["category"], r["description"], r["severity"],
-                      STATUS_STYLE.get(r["status"], r["status"]))
+                      r["mitre_technique"], STATUS_STYLE.get(r["status"], r["status"]))
     console.print(table)
-    passed = sum(1 for r in results if r["status"] == "PASS")
-    failed = sum(1 for r in results if r["status"] == "FAIL")
-    errors = sum(1 for r in results if r["status"] == "ERROR")
     console.print(Panel(
-        f"[bold green]{passed} PASS[/bold green]   [bold red]{failed} FAIL[/bold red]   "
-        f"[bold yellow]{errors} ERROR[/bold yellow]   / {len(results)} total checks", title="Summary"))
+        f"[bold green]{scores['passed']} PASS[/bold green]   "
+        f"[bold red]{scores['failed']} FAIL[/bold red]   "
+        f"[bold yellow]{scores['errors']} ERROR[/bold yellow]   "
+        f"/ {scores['total']} total checks\n"
+        f"Simple Score: [bold]{scores['simple_score']}%[/bold]   "
+        f"Risk-Weighted Score: [bold]{scores['weighted_score']}%[/bold]",
+        title="Summary"))
 
-def generate_html_report(results, output_path, template_dir):
+# ---------------------------------------------------------------------------
+# Report generation
+# ---------------------------------------------------------------------------
+
+def generate_html_report(results, scores, output_path, template_dir):
     env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template("report_template.html")
-    passed = sum(1 for r in results if r["status"] == "PASS")
-    failed = sum(1 for r in results if r["status"] == "FAIL")
-    errors = sum(1 for r in results if r["status"] == "ERROR")
     html = template.render(
-        results=results, generated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        hostname=platform.node(), os_version=platform.platform(), total=len(results),
-        passed=passed, failed=failed, errors=errors,
-        score=round((passed / len(results)) * 100, 1) if results else 0)
+        results=results,
+        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        hostname=platform.node(),
+        os_version=platform.platform(),
+        **scores,
+    )
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
     console.print(f"[bold cyan]HTML report saved to:[/bold cyan] {output_path}")
+
+def save_scan_json(results, scores, scans_dir, demo):
+    """Persist audit results as timestamped JSON for history tracking."""
+    os.makedirs(scans_dir, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    scan_record = {
+        "timestamp": datetime.now().isoformat(),
+        "hostname": platform.node(),
+        "os_version": platform.platform(),
+        "mode": "demo" if demo else "live",
+        "scores": scores,
+        "results": results,
+    }
+    path = os.path.join(scans_dir, f"audit_{ts}.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(scan_record, f, indent=2, default=str)
+    console.print(f"[bold cyan]Scan history saved to:[/bold cyan] {path}")
+    return path
+
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(description="Windows Security Misconfiguration Auditor")
@@ -137,6 +211,7 @@ def main():
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     template_dir = os.path.join(base_dir, "templates")
+    scans_dir = os.path.join(base_dir, "scans")
 
     if not args.demo and platform.system() != "Windows":
         console.print("[bold yellow]Non-Windows OS detected — auto-enabling --demo mode.[/bold yellow]")
@@ -146,8 +221,10 @@ def main():
 
     rules = load_rules(args.rules)
     results = run_audit(rules, demo=args.demo)
-    print_summary(results)
-    generate_html_report(results, args.output, template_dir)
+    scores = compute_scores(results)
+    print_summary(results, scores)
+    generate_html_report(results, scores, args.output, template_dir)
+    save_scan_json(results, scores, scans_dir, demo=args.demo)
 
 if __name__ == "__main__":
     main()

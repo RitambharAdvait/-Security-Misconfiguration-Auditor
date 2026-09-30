@@ -5,6 +5,12 @@
   target_key: "EnableSMB1Protocol"
   expected_value: false
   severity: "CRITICAL"
+  risk_explanation: "SMBv1 is an insecure, legacy protocol vulnerable to remote code execution exploits like EternalBlue (used in the WannaCry ransomware attack). It lacks modern encryption and pre-authentication integrity checks."
+  remediation_command: "Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.3.4"
+  mitre_tactic: "Lateral Movement"
+  mitre_technique: "T1021.002"
+  mitre_name: "SMB/Windows Admin Shares"
 
 - rule_id: WIN-SEC-002
   category: "Privilege Escalation"
@@ -13,6 +19,12 @@
   target_key: "EnableLUA"
   expected_value: 1
   severity: "HIGH"
+  risk_explanation: "Disabling UAC allows standard users and processes to silently elevate privileges and modify sensitive system files, registry entries, and core operating system configurations without administrative prompts."
+  remediation_command: "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'EnableLUA' -Value 1 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 2.3.17.1"
+  mitre_tactic: "Privilege Escalation"
+  mitre_technique: "T1548.002"
+  mitre_name: "Bypass User Account Control"
 
 - rule_id: WIN-SEC-003
   category: "Remote Access"
@@ -21,6 +33,12 @@
   target_key: "UserAuthentication"
   expected_value: 1
   severity: "HIGH"
+  risk_explanation: "Disabling Network Level Authentication (NLA) allows unauthenticated remote attackers to initiate RDP sessions before presenting credentials, exposing systems to credential brute-forcing, Denial of Service, and unauthenticated RCE exploits (e.g., BlueKeep CVE-2019-0708)."
+  remediation_command: "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' -Name 'UserAuthentication' -Value 1 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.60.2"
+  mitre_tactic: "Lateral Movement"
+  mitre_technique: "T1021.001"
+  mitre_name: "Remote Desktop Protocol"
 
 - rule_id: WIN-SEC-004
   category: "Defense Evasion"
@@ -29,6 +47,12 @@
   target_key: "RealTimeProtectionEnabled"
   expected_value: true
   severity: "CRITICAL"
+  risk_explanation: "Disabling Defender real-time protection permits malware execution, malicious memory injections, and script-based droppers to run completely unhindered and undetected."
+  remediation_command: "Set-MpPreference -DisableRealtimeMonitoring $false"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.46.4.1"
+  mitre_tactic: "Defense Evasion"
+  mitre_technique: "T1562.001"
+  mitre_name: "Disable or Modify Tools"
 
 - rule_id: WIN-SEC-005
   category: "Credential Protection"
@@ -37,6 +61,12 @@
   target_key: "Enabled"
   expected_value: false
   severity: "MEDIUM"
+  risk_explanation: "An active Guest account provides anonymous local logon capability and can be leveraged by attackers for initial persistence or reconnaissance on the local network."
+  remediation_command: "Disable-LocalUser -Name 'Guest'"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 2.3.1.3"
+  mitre_tactic: "Persistence"
+  mitre_technique: "T1078.003"
+  mitre_name: "Local Accounts"
 
 - rule_id: WIN-SEC-006
   category: "Network Security"
@@ -45,6 +75,12 @@
   target_key: "Enabled"
   expected_value: 1
   severity: "HIGH"
+  risk_explanation: "Disabling host-based firewalls for domain connections removes the first line of boundary defense against rogue endpoints, lateral network scans, and unauthorized service probing within corporate networks."
+  remediation_command: "Set-NetFirewallProfile -Name Domain -Enabled True"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 9.1.1"
+  mitre_tactic: "Defense Evasion"
+  mitre_technique: "T1562.004"
+  mitre_name: "Disable or Modify System Firewall"
 
 - rule_id: WIN-SEC-007
   category: "Credential Protection"
@@ -53,6 +89,12 @@
   target_key: "RunAsPPL"
   expected_value: 1
   severity: "CRITICAL"
+  risk_explanation: "Running the Local Security Authority (LSA) process as a Protected Process Light (PPL) prevents non-protected processes, even those with administrative privileges, from injecting code or dumping credentials (e.g., Mimikatz reading lsass.exe memory)."
+  remediation_command: "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa' -Name 'RunAsPPL' -Value 1 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.8.22.1.13"
+  mitre_tactic: "Credential Access"
+  mitre_technique: "T1003.001"
+  mitre_name: "LSASS Memory"
 
 - rule_id: WIN-SEC-008
   category: "Execution Policy"
@@ -61,6 +103,12 @@
   target_key: "ExecutionPolicy"
   expected_value: "AllSigned"
   severity: "MEDIUM"
+  risk_explanation: "An unrestricted PowerShell execution policy permits execution of unverified, downloaded scripts. Enforcing signed script execution or at least RemoteSigned prevents drive-by or downloaded malicious script execution."
+  remediation_command: "# CIS allows RemoteSigned; AllSigned is stricter but can break local dev scripts\nSet-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy RemoteSigned -Force"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.107.2.2"
+  mitre_tactic: "Execution"
+  mitre_technique: "T1059.001"
+  mitre_name: "PowerShell"
 
 - rule_id: WIN-SEC-009
   category: "Patch Management"
@@ -69,6 +117,12 @@
   target_key: "NoAutoUpdate"
   expected_value: 0
   severity: "MEDIUM"
+  risk_explanation: "Disabling automatic updates prevents timely patching of critical zero-day vulnerabilities and OS security flaws, exposing the platform to known exploits documented in NVD/CVE databases."
+  remediation_command: "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU' -Name 'NoAutoUpdate' -Value 0 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.102.1.1"
+  mitre_tactic: "Defense Evasion"
+  mitre_technique: "T1562.001"
+  mitre_name: "Disable or Modify Tools"
 
 - rule_id: WIN-SEC-010
   category: "Data Protection"
@@ -77,6 +131,12 @@
   target_key: "VolumeStatus"
   expected_value: "FullyEncrypted"
   severity: "HIGH"
+  risk_explanation: "Unencrypted volumes expose all host data, user credentials, and offline registry hives (SAM, SYSTEM) to physical theft, offline attacks, or malicious live booting."
+  remediation_command: "Enable-BitLocker -MountPoint 'C:' -EncryptionMethod XtsAes256 -UsedSpaceOnly -TpmProtector"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.8.3"
+  mitre_tactic: "Defense Evasion"
+  mitre_technique: "T1140"
+  mitre_name: "Deobfuscate/Decode Files or Information"
 
 - rule_id: WIN-SEC-011
   category: "Privilege Escalation"
@@ -85,6 +145,12 @@
   target_key: "AlwaysInstallElevated"
   expected_value: 0
   severity: "CRITICAL"
+  risk_explanation: "When AlwaysInstallElevated is set to 1 in HKLM, Windows Installer executes all MSI packages with NT AUTHORITY\\SYSTEM privileges, allowing standard unprivileged users to craft a malicious MSI package and immediately gain full root/SYSTEM control."
+  remediation_command: "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer' -Name 'AlwaysInstallElevated' -Value 0 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.86.1"
+  mitre_tactic: "Privilege Escalation"
+  mitre_technique: "T1548.002"
+  mitre_name: "Bypass User Account Control"
 
 - rule_id: WIN-SEC-012
   category: "Privilege Escalation"
@@ -93,6 +159,12 @@
   target_key: "AlwaysInstallElevated"
   expected_value: 0
   severity: "CRITICAL"
+  risk_explanation: "AlwaysInstallElevated in HKCU must also be 0; if enabled in conjunction with HKLM, standard users can trigger elevated MSI installations from their own user registry hive."
+  remediation_command: "Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer' -Name 'AlwaysInstallElevated' -Value 0 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.86.2"
+  mitre_tactic: "Privilege Escalation"
+  mitre_technique: "T1548.002"
+  mitre_name: "Bypass User Account Control"
 
 - rule_id: WIN-SEC-013
   category: "Credential Protection"
@@ -101,6 +173,12 @@
   target_key: "UseLogonCredential"
   expected_value: 0
   severity: "CRITICAL"
+  risk_explanation: "When UseLogonCredential is enabled (1), WDigest retains plaintext passwords in LSASS memory for digest authentication, allowing attackers with administrative access or memory inspection tools to extract cleartext passwords directly."
+  remediation_command: "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -Name 'UseLogonCredential' -Value 0 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.8.22.1.1"
+  mitre_tactic: "Credential Access"
+  mitre_technique: "T1003.001"
+  mitre_name: "LSASS Memory"
 
 - rule_id: WIN-SEC-014
   category: "Network Security"
@@ -109,6 +187,12 @@
   target_key: "EnableMulticast"
   expected_value: 0
   severity: "HIGH"
+  risk_explanation: "LLMNR allows unauthenticated multicast name queries on local subnets. Attackers on the same network use tools like Responder to poison LLMNR responses, tricking victims into sending NTLMv2 password hashes."
+  remediation_command: "if (!(Test-Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient')) { New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient' -Force }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient' -Name 'EnableMulticast' -Value 0 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.30.2"
+  mitre_tactic: "Credential Access"
+  mitre_technique: "T1557.001"
+  mitre_name: "LLMNR/NBT-NS Poisoning and SMB Relay"
 
 - rule_id: WIN-SEC-015
   category: "Endpoint Hardening"
@@ -117,6 +201,12 @@
   target_key: "NoDriveTypeAutoRun"
   expected_value: 255
   severity: "MEDIUM"
+  risk_explanation: "AutoRun / AutoPlay automatically executes programs from newly connected removable media (USB drives, CDs), serving as a common vector for physical and air-gap breaching malware (e.g., Stuxnet)."
+  remediation_command: "if (!(Test-Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer')) { New-Item -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer' -Force }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer' -Name 'NoDriveTypeAutoRun' -Value 255 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.13.1"
+  mitre_tactic: "Initial Access"
+  mitre_technique: "T1091"
+  mitre_name: "Replication Through Removable Media"
 
 - rule_id: WIN-SEC-016
   category: "Endpoint Hardening"
@@ -125,6 +215,12 @@
   target_key: "Enabled"
   expected_value: 0
   severity: "MEDIUM"
+  risk_explanation: "Windows Script Host (WSH) executes VBScript and JScript files (.vbs, .js). It is frequently abused by phishing attachments and initial access payloads to execute malicious code outside browser sandboxes."
+  remediation_command: "if (!(Test-Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows Script Host\\Settings')) { New-Item -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows Script Host\\Settings' -Force }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows Script Host\\Settings' -Name 'Enabled' -Value 0 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.104.1"
+  mitre_tactic: "Execution"
+  mitre_technique: "T1059.005"
+  mitre_name: "Visual Basic"
 
 - rule_id: WIN-SEC-017
   category: "Audit & Logging"
@@ -133,6 +229,12 @@
   target_key: "EnableScriptBlockLogging"
   expected_value: 1
   severity: "MEDIUM"
+  risk_explanation: "Without Script Block Logging (Event ID 4104), executed PowerShell code—including dynamically de-obfuscated commands and scripts loaded in-memory—is not recorded in event logs, blinding incident responders to malicious activity."
+  remediation_command: "if (!(Test-Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging')) { New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Force }; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Name 'EnableScriptBlockLogging' -Value 1 -Type DWord"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.9.107.1.1"
+  mitre_tactic: "Defense Evasion"
+  mitre_technique: "T1562.002"
+  mitre_name: "Disable Windows Event Logging"
 
 - rule_id: WIN-SEC-018
   category: "Account Security"
@@ -141,6 +243,12 @@
   target_key: "Enabled"
   expected_value: false
   severity: "HIGH"
+  risk_explanation: "The built-in Administrator account has a well-known SID (RID 500) and is a primary target for password brute-forcing, password spray, and pass-the-hash attacks. It should be disabled in favor of named administrative accounts."
+  remediation_command: "Disable-LocalUser -Name 'Administrator'"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 2.3.1.1"
+  mitre_tactic: "Persistence"
+  mitre_technique: "T1078.003"
+  mitre_name: "Local Accounts"
 
 - rule_id: WIN-SEC-019
   category: "Lateral Movement"
@@ -149,6 +257,12 @@
   target_key: "RequireSecuritySignature"
   expected_value: true
   severity: "HIGH"
+  risk_explanation: "Unsigned SMB traffic is vulnerable to Man-in-the-Middle (MitM) packet tampering and SMB Relay attacks, allowing adversaries to impersonate clients and execute commands on other domain systems."
+  remediation_command: "Set-SmbClientConfiguration -RequireSecuritySignature $true -Force"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 18.3.5"
+  mitre_tactic: "Lateral Movement"
+  mitre_technique: "T1021.002"
+  mitre_name: "SMB/Windows Admin Shares"
 
 - rule_id: WIN-SEC-020
   category: "Attack Surface"
@@ -157,3 +271,9 @@
   target_key: "Status"
   expected_value: "Stopped"
   severity: "HIGH"
+  risk_explanation: "The Windows Print Spooler service has a history of high-severity vulnerabilities (e.g. PrintNightmare CVE-2021-34527 / CVE-2021-1675) allowing remote code execution and local privilege escalation."
+  remediation_command: "# Apply to non-print servers only. If this host requires local printing, leave enabled\nStop-Service -Name Spooler -Force; Set-Service -Name Spooler -StartupType Disabled"
+  cis_reference: "CIS Microsoft Windows 11 v2.0.0 - 5.40"
+  mitre_tactic: "Lateral Movement"
+  mitre_technique: "T1210"
+  mitre_name: "Exploitation of Remote Services"

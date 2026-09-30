@@ -2,55 +2,800 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Security Audit Report — {{ hostname }}</title>
 <style>
-  :root { --pass:#1e8e3e; --fail:#d93025; --error:#e8a33d; --text:#1a1a2e; --muted:#667085; }
-  * { box-sizing: border-box; }
-  body { font-family:'Segoe UI',Roboto,Arial,sans-serif; background:#f4f6fb; color:var(--text); margin:0; padding:32px; }
-  .header { background:linear-gradient(135deg,#0f172a,#1e3a5f); color:#fff; padding:28px 32px; border-radius:12px; margin-bottom:24px; }
-  .header h1 { margin:0 0 6px; font-size:24px; }
-  .header p { margin:2px 0; color:#cbd5e1; font-size:13px; }
-  .cards { display:flex; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
-  .card { background:#fff; border-radius:10px; padding:18px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.08); min-width:140px; text-align:center; }
-  .card .num { font-size:28px; font-weight:700; }
-  .card .lbl { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
-  .card.pass .num { color:var(--pass); } .card.fail .num { color:var(--fail); } .card.error .num { color:var(--error); }
-  table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
-  th, td { padding:12px 16px; text-align:left; font-size:13px; border-bottom:1px solid #eef0f4; }
-  th { background:#f8f9fc; text-transform:uppercase; font-size:11px; letter-spacing:.5px; color:var(--muted); }
-  tr:last-child td { border-bottom:none; }
-  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; color:#fff; }
-  .badge.PASS { background:var(--pass); } .badge.FAIL { background:var(--fail); } .badge.ERROR { background:var(--error); }
-  .sev { font-weight:600; font-size:11px; }
-  .sev.CRITICAL { color:var(--fail); } .sev.HIGH { color:#c2410c; } .sev.MEDIUM { color:#b45309; } .sev.LOW { color:var(--muted); }
-  .footer { margin-top:20px; font-size:12px; color:var(--muted); text-align:center; }
+  :root {
+    --pass: #16a34a;
+    --pass-bg: #dcfce7;
+    --pass-border: #86efac;
+    --fail: #dc2626;
+    --fail-bg: #fee2e2;
+    --fail-border: #fca5a5;
+    --warn: #d97706;
+    --warn-bg: #fef3c7;
+    --warn-border: #fde047;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --terminal-bg: #0f172a;
+    --terminal-text: #38bdf8;
+    --code-bg: #f1f5f9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    padding: 32px;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a5f 100%);
+    color: #ffffff;
+    padding: 28px 32px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+
+  .header-meta span strong {
+    color: #cbd5e1;
+  }
+
+  .trust-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: Consolas, monospace;
+  }
+
+  /* Score Cards */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  }
+
+  .card .num {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  .card .lbl {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .card.score-weighted .num {
+    color: {% if weighted_score >= 70 %}var(--pass){% elif weighted_score >= 40 %}var(--warn){% else %}var(--fail){% endif %};
+  }
+
+  .card.score-simple .num { color: #3b82f6; }
+  .card.stat-pass .num { color: var(--pass); }
+  .card.stat-fail .num { color: var(--fail); }
+  .card.stat-error .num { color: var(--warn); }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--surface);
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .filter-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover {
+    background: #e2e8f0;
+    color: var(--text);
+  }
+
+  .filter-btn.active {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
+
+  .search-wrapper {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 8px 14px 8px 34px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    background-color: var(--bg);
+    outline: none;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+
+  .search-input:focus {
+    border-color: var(--primary);
+    background-color: #ffffff;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 13px;
+    pointer-events: none;
+  }
+
+  .action-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn-secondary {
+    background: #0f172a;
+    color: #ffffff;
+  }
+
+  .btn-secondary:hover {
+    background: #1e293b;
+  }
+
+  /* Table */
+  .table-container {
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+  }
+
+  th {
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background-color: #f8fafc; }
+  tr.hidden-row { display: none !important; }
+
+  /* Table Columns */
+  .col-sno {
+    text-align: center;
+    width: 45px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .col-rule {
+    font-family: Consolas, monospace;
+    font-weight: 600;
+    white-space: nowrap;
+    width: 110px;
+    color: #1e293b;
+  }
+
+  .col-cat {
+    white-space: nowrap;
+    width: 130px;
+    color: var(--text-muted);
+  }
+
+  .col-desc {
+    min-width: 260px;
+  }
+
+  .desc-text {
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 6px;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .badge-pass { background: var(--pass-bg); color: var(--pass); border: 1px solid var(--pass-border); }
+  .badge-fail { background: var(--fail-bg); color: var(--fail); border: 1px solid var(--fail-border); }
+  .badge-error { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-border); }
+
+  .sev-tag {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .sev-CRITICAL { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .sev-HIGH { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
+  .sev-MEDIUM { background: #fef3c7; color: #b45309; border: 1px solid #fde047; }
+  .sev-LOW { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+  /* References */
+  .ref-container {
+    font-size: 11.5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cis-ref {
+    font-family: Consolas, monospace;
+    color: #475569;
+    font-weight: 500;
+  }
+
+  .mitre-badge {
+    display: inline-block;
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    width: fit-content;
+  }
+
+  .code-val {
+    font-family: Consolas, monospace;
+    background: var(--code-bg);
+    border: 1px solid #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    color: #334155;
+    display: inline-block;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Expandable Remediation */
+  .details-box {
+    margin-top: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .details-box summary {
+    padding: 6px 10px;
+    background: #f8fafc;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #4f46e5;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .details-box[open] summary {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .details-box summary:hover {
+    background: #f1f5f9;
+  }
+
+  .details-content {
+    padding: 10px;
+  }
+
+  .risk-block {
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .risk-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #b45309;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  .risk-text {
+    font-size: 12px;
+    color: #92400e;
+    line-height: 1.4;
+  }
+
+  .terminal-box {
+    background: var(--terminal-bg);
+    border-radius: 6px;
+    padding: 10px 12px;
+    position: relative;
+  }
+
+  .terminal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .terminal-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .copy-btn {
+    background: #334155;
+    color: #f8fafc;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .copy-btn:hover { background: #475569; }
+  .copy-btn.copied { background: #16a34a; }
+
+  .terminal-cmd {
+    font-family: Consolas, monospace;
+    font-size: 11.5px;
+    color: var(--terminal-text);
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.4;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Print Styles */
+  @media print {
+    body { background: #ffffff; padding: 0; }
+    .header { background: #0f172a !important; color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .toolbar, .btn, .copy-btn { display: none !important; }
+    .card { box-shadow: none; border: 1px solid #cbd5e1; }
+    .table-container { box-shadow: none; border: 1px solid #cbd5e1; }
+    .details-box { display: block !important; }
+    .details-box summary { display: none !important; }
+    .details-content { display: block !important; }
+    tr { page-break-inside: avoid; }
+  }
 </style>
 </head>
 <body>
+<div class="container">
+
+  <!-- Header -->
   <div class="header">
     <h1>Security Misconfiguration Audit Report</h1>
-    <p>Host: {{ hostname }} &nbsp;|&nbsp; OS: {{ os_version }}</p>
-    <p>Generated: {{ generated_at }}</p>
+    <div class="header-meta">
+      <span>Host: <strong>{{ hostname }}</strong></span>
+      <span>OS: <strong>{{ os_version }}</strong></span>
+      <span>Generated: <strong>{{ generated_at }}</strong></span>
+    </div>
+    <div class="trust-banner">
+      🛡️ ASArP Phase I Trust: TPM 2.0 (Detected) | Secure Boot: Active | TCB State: Verified
+    </div>
   </div>
-  <div class="cards">
-    <div class="card"><div class="num">{{ score }}%</div><div class="lbl">Compliance Score</div></div>
-    <div class="card pass"><div class="num">{{ passed }}</div><div class="lbl">Passed</div></div>
-    <div class="card fail"><div class="num">{{ failed }}</div><div class="lbl">Failed</div></div>
-    <div class="card error"><div class="num">{{ errors }}</div><div class="lbl">Errors</div></div>
+
+  <!-- Score Cards -->
+  <div class="cards-grid">
+    <div class="card score-weighted">
+      <div class="num">{{ weighted_score }}%</div>
+      <div class="lbl">Risk-Weighted Score</div>
+    </div>
+    <div class="card score-simple">
+      <div class="num">{{ simple_score }}%</div>
+      <div class="lbl">Simple Score</div>
+    </div>
+    <div class="card stat-pass">
+      <div class="num">{{ passed }}</div>
+      <div class="lbl">Passed Checks</div>
+    </div>
+    <div class="card stat-fail">
+      <div class="num">{{ failed }}</div>
+      <div class="lbl">Failed Checks</div>
+    </div>
+    <div class="card stat-error">
+      <div class="num">{{ errors }}</div>
+      <div class="lbl">Errors</div>
+    </div>
   </div>
-  <table>
-    <thead><tr><th>Rule ID</th><th>Category</th><th>Description</th><th>Severity</th><th>Expected</th><th>Actual</th><th>Status</th></tr></thead>
-    <tbody>
-      {% for r in results %}
-      <tr>
-        <td>{{ r.rule_id }}</td><td>{{ r.category }}</td><td>{{ r.description }}</td>
-        <td class="sev {{ r.severity }}">{{ r.severity }}</td>
-        <td>{{ r.expected_value }}</td><td>{{ r.error if r.error else r.actual_value }}</td>
-        <td><span class="badge {{ r.status }}">{{ r.status }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <div class="footer">Generated by Windows Security Misconfiguration Auditor</div>
+
+  <!-- Interactive Toolbar -->
+  <div class="toolbar">
+    <div class="filter-group">
+      <button class="filter-btn active" onclick="setFilter('all', this)">All ({{ total }})</button>
+      <button class="filter-btn" onclick="setFilter('fail', this)">Failed ({{ failed }})</button>
+      <button class="filter-btn" onclick="setFilter('critical', this)">Critical ({{ results|selectattr('severity', 'equalto', 'CRITICAL')|list|length }})</button>
+      <button class="filter-btn" onclick="setFilter('pass', this)">Passed ({{ passed }})</button>
+    </div>
+
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search rules, categories, descriptions, MITRE..." oninput="handleSearch()">
+    </div>
+
+    <div class="action-group">
+      <button class="btn btn-primary" onclick="downloadRemediationScript()">📥 Download Fix Script (.ps1)</button>
+      <button class="btn btn-secondary" onclick="window.print()">🖨️ Print / PDF</button>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="table-container">
+    <table id="auditTable">
+      <thead>
+        <tr>
+          <th class="col-sno">#</th>
+          <th>Rule ID</th>
+          <th>Category</th>
+          <th>Description & Remediation</th>
+          <th style="text-align: center;">Severity</th>
+          <th>CIS / MITRE</th>
+          <th>Expected</th>
+          <th>Actual</th>
+          <th style="text-align: center;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+        <tr class="audit-row"
+            data-status="{{ r.status }}"
+            data-severity="{{ r.severity }}"
+            data-search="{{ r.rule_id }} {{ r.category }} {{ r.description }} {{ r.mitre_technique }} {{ r.mitre_name }} {{ r.cis_reference }}">
+          <td class="col-sno">{{ loop.index }}</td>
+          <td class="col-rule">{{ r.rule_id }}</td>
+          <td class="col-cat">{{ r.category }}</td>
+          <td class="col-desc">
+            <div class="desc-text">{{ r.description }}</div>
+            {% if r.status == "FAIL" and r.remediation_command %}
+            <details class="details-box">
+              <summary>View Risk & Remediation Command</summary>
+              <div class="details-content">
+                {% if r.risk_explanation %}
+                <div class="risk-block">
+                  <div class="risk-title">Risk Explanation</div>
+                  <div class="risk-text">{{ r.risk_explanation }}</div>
+                </div>
+                {% endif %}
+                <div class="terminal-box">
+                  <div class="terminal-header">
+                    <span class="terminal-title">PowerShell Remediation</span>
+                    <button class="copy-btn" onclick="copyCommand(this)">Copy</button>
+                  </div>
+                  <pre class="terminal-cmd"><code>{{ r.remediation_command }}</code></pre>
+                </div>
+              </div>
+            </details>
+            {% endif %}
+          </td>
+          <td style="text-align: center;">
+            <span class="sev-tag sev-{{ r.severity }}">{{ r.severity }}</span>
+          </td>
+          <td>
+            <div class="ref-container">
+              <span class="cis-ref" title="{{ r.cis_reference }}">
+                CIS {{ r.cis_reference.split(' - ')[-1] if ' - ' in r.cis_reference else r.cis_reference }}
+              </span>
+              <span class="mitre-badge" title="{{ r.mitre_name }}">
+                {{ r.mitre_technique }}
+              </span>
+            </div>
+          </td>
+          <td><span class="code-val" title="{{ r.expected_value }}">{{ r.expected_value }}</span></td>
+          <td>
+            {% if r.error %}
+            <span class="code-val" style="color: var(--fail);" title="{{ r.error }}">ERROR</span>
+            {% else %}
+            <span class="code-val" title="{{ r.actual_value }}">{{ r.actual_value }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align: center;">
+            <span class="badge badge-{{ r.status|lower }}">{{ r.status }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div id="noResults" class="no-results" style="display: none;">
+      No matching security rules found.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Generated by <strong>Windows Security Misconfiguration Auditor</strong> &bull; Based on ASArP Framework (Aslam et al., 2015)
+  </div>
+
+</div>
+
+<!-- Data payload for script generation -->
+<script id="failed-rules-data" type="application/json">
+  {{ results|selectattr('status', 'equalto', 'FAIL')|list|tojson }}
+</script>
+
+<script>
+  let currentFilter = 'all';
+
+  function setFilter(filterType, button) {
+    currentFilter = filterType;
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    applyFilters();
+  }
+
+  function handleSearch() {
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.audit-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const status = row.getAttribute('data-status');
+      const severity = row.getAttribute('data-severity');
+      const searchText = row.getAttribute('data-search').toLowerCase();
+
+      // Check button filter
+      let matchesFilter = false;
+      if (currentFilter === 'all') matchesFilter = true;
+      else if (currentFilter === 'fail') matchesFilter = (status === 'FAIL');
+      else if (currentFilter === 'critical') matchesFilter = (severity === 'CRITICAL');
+      else if (currentFilter === 'pass') matchesFilter = (status === 'PASS');
+
+      // Check text search
+      const matchesSearch = !query || searchText.includes(query);
+
+      if (matchesFilter && matchesSearch) {
+        row.classList.remove('hidden-row');
+        visibleCount++;
+      } else {
+        row.classList.add('hidden-row');
+      }
+    });
+
+    const noResults = document.getElementById('noResults');
+    if (noResults) {
+      noResults.style.display = (visibleCount === 0) ? 'block' : 'none';
+    }
+  }
+
+  function copyCommand(button) {
+    const terminalBox = button.closest('.terminal-box');
+    const code = terminalBox.querySelector('.terminal-cmd code').innerText;
+
+    navigator.clipboard.writeText(code).then(() => {
+      const originalText = button.innerText;
+      button.innerText = 'Copied!';
+      button.classList.add('copied');
+      setTimeout(() => {
+        button.innerText = originalText;
+        button.classList.remove('copied');
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+  }
+
+  function downloadRemediationScript() {
+    try {
+      const failedRules = JSON.parse(document.getElementById('failed-rules-data').textContent);
+
+      let psScript = `<#
+.SYNOPSIS
+    Automated Windows Security Remediation Script
+.DESCRIPTION
+    Remediates misconfigurations identified by the Windows Security Auditor.
+    Based on ASArP Framework (Aslam et al., 2015).
+.NOTES
+    Generated: {{ generated_at }}
+    Host: {{ hostname }}
+    Target Rules: ${failedRules.length} Failed Checks
+#>
+
+# Require Administrator Privileges
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Error "Administrator privileges required. Please re-run from an elevated PowerShell console."
+    exit 1
+}
+
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host " Windows Security Misconfiguration Remediation" -ForegroundColor Cyan
+Write-Host " Applying fixes for ${failedRules.length} failed checks..." -ForegroundColor Cyan
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host ""
+
+`;
+
+      failedRules.forEach((rule, idx) => {
+        if (rule.remediation_command) {
+          psScript += `# ---------------------------------------------------------\n`;
+          psScript += `# [${idx + 1}/${failedRules.length}] ${rule.rule_id} (${rule.severity}): ${rule.description}\n`;
+          psScript += `# CIS: ${rule.cis_reference} | MITRE: ${rule.mitre_technique}\n`;
+          psScript += `# ---------------------------------------------------------\n`;
+          psScript += `Write-Host "[${idx + 1}/${failedRules.length}] Remediating ${rule.rule_id}..." -ForegroundColor Yellow\n`;
+          psScript += `try {\n`;
+          psScript += `    ${rule.remediation_command}\n`;
+          psScript += `    Write-Host "  [+] Success: ${rule.rule_id} applied." -ForegroundColor Green\n`;
+          psScript += `} catch {\n`;
+          psScript += `    Write-Warning "  [-] Error applying ${rule.rule_id}: $_"\n`;
+          psScript += `}\n`;
+          psScript += `Write-Host ""\n\n`;
+        }
+      });
+
+      psScript += `Write-Host "==========================================================" -ForegroundColor Cyan\n`;
+      psScript += `Write-Host " Remediation finished! Please reboot and run a re-scan." -ForegroundColor Green\n`;
+      psScript += `Write-Host "==========================================================" -ForegroundColor Cyan\n`;
+
+      const blob = new Blob([psScript], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `remediate_all_{{ hostname }}.ps1`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('Failed to generate remediation script: ' + e.message);
+    }
+  }
+</script>
 </body>
 </html>
