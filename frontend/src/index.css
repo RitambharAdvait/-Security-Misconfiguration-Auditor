@@ -3,13 +3,123 @@
 @tailwind utilities;
 
 :root {
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --success: #16a34a;
-  --fail: #dc2626;
-  --warning: #d97706;
+  --primary-navy: #071219;
+  --accent-neon: #00ff9d;
+  --accent-emerald: #10b981;
+  --canvas-bg: #050a0e;
+  --mouse-x: 50vw;
+  --mouse-y: 50vh;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #050a0e;
+  color: #f1f5f9;
+  overflow-x: hidden;
+}
+
+/* Cyber Security Ambient Grid Background */
+.cyber-grid-canvas {
+  background-color: #050a0e;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(0, 255, 157, 0.08) 0%, transparent 60%),
+    linear-gradient(to right, rgba(27, 55, 75, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(27, 55, 75, 0.25) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+}
+
+/* Global Cursor Spotlight Glow - Subtly follows cursor (reduced to ~30% size) */
+.cursor-spotlight-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  background: radial-gradient(
+    220px circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh),
+    rgba(0, 255, 157, 0.13),
+    rgba(16, 185, 129, 0.03) 45%,
+    transparent 80%
+  );
+  transition: opacity 0.3s ease;
+}
+
+/* Rising Cyber Tiles with Green Neon Glow on Hover */
+.cyber-tile {
+  background: #0b1922;
+  border: 1px solid rgba(27, 55, 75, 0.85);
+  border-radius: 0.875rem;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.cyber-tile:hover {
+  transform: translateY(-5px);
+  border-color: rgba(0, 255, 157, 0.45);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.85), 0 0 24px -2px rgba(0, 255, 157, 0.22);
+}
+
+/* Active Cyber Button Hover Glow */
+.cyber-btn-glow {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cyber-btn-glow:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Scanning Beam Animation across Header bottom */
+@keyframes scanBeam {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-scan-beam {
+  animation: scanBeam 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Sonar radar pulse animation */
+@keyframes radarPing {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.animate-radar-ping {
+  animation: radarPing 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Neon Text Glow */
+.text-neon-glow {
+  text-shadow: 0 0 10px rgba(0, 255, 157, 0.5), 0 0 20px rgba(0, 255, 157, 0.25);
+}
+
+/* Custom Cyberpunk / Dark Console Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #071219;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1b374b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00ff9d;
+  box-shadow: 0 0 8px rgba(0, 255, 157, 0.5);
 }

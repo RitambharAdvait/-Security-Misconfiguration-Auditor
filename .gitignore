@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 venv/
 audit_report.html
+.claude/
+frontend/node_modules/
+certs/
+*.pem
