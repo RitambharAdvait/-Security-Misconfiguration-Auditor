@@ -6,6 +6,8 @@ import os
 import sys
 import json
 import time
+import shutil
+import yaml
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional, Any
@@ -40,6 +42,8 @@ app.add_middleware(
 # Paths
 BASE_DIR = Path(__file__).parent.parent
 RULES_PATH = BASE_DIR / "rules.yaml"
+RULES_DEFAULT_PATH = BASE_DIR / "rules_default.yaml"
+BENCHMARKS_CATALOG_PATH = BASE_DIR / "benchmarks" / "catalog.json"
 SCANS_DIR = BASE_DIR / "scans"
 FRONTEND_DIR = BASE_DIR / "frontend" / "dist"
 
@@ -103,6 +107,91 @@ class Rule(BaseModel):
     mitre_name: str
     risk_explanation: str
     remediation_command: str
+
+
+class RuleManage(BaseModel):
+    """Full rule schema including management fields (enabled flag, custom source)."""
+    rule_id: str
+    category: str
+    description: str
+    severity: str
+    ps_command: str
+    target_key: str
+    expected_value: Any
+    cis_reference: str
+    nist_control: Optional[str] = "N/A"
+    stig_id: Optional[str] = "N/A"
+    mitre_tactic: str
+    mitre_technique: str
+    mitre_name: str
+    risk_explanation: str
+    remediation_command: str
+    enabled: bool = True
+    source: Optional[str] = "custom"  # "builtin", "cis", "nist", "stig", "mitre", "custom"
+
+
+class RuleCreate(BaseModel):
+    """Payload for creating a brand new rule."""
+    rule_id: str
+    category: str
+    description: str
+    severity: str
+    ps_command: str
+    target_key: str
+    expected_value: Any
+    cis_reference: Optional[str] = "Custom Rule"
+    nist_control: Optional[str] = "N/A"
+    stig_id: Optional[str] = "N/A"
+    mitre_tactic: Optional[str] = "N/A"
+    mitre_technique: Optional[str] = "N/A"
+    mitre_name: Optional[str] = "N/A"
+    risk_explanation: Optional[str] = ""
+    remediation_command: Optional[str] = ""
+    source: Optional[str] = "custom"
+
+
+class RuleUpdate(BaseModel):
+    """Payload for updating an existing rule — all fields optional."""
+    category: Optional[str] = None
+    description: Optional[str] = None
+    severity: Optional[str] = None
+    ps_command: Optional[str] = None
+    target_key: Optional[str] = None
+    expected_value: Optional[Any] = None
+    cis_reference: Optional[str] = None
+    nist_control: Optional[str] = None
+    stig_id: Optional[str] = None
+    mitre_tactic: Optional[str] = None
+    mitre_technique: Optional[str] = None
+    mitre_name: Optional[str] = None
+    risk_explanation: Optional[str] = None
+    remediation_command: Optional[str] = None
+    enabled: Optional[bool] = None
+
+
+class BenchmarkCatalogItem(BaseModel):
+    catalog_id: str
+    name: str
+    benchmark_family: str
+    benchmark_profile: str
+    cis_reference: str
+    nist_control: Optional[str] = "N/A"
+    stig_id: Optional[str] = "N/A"
+    category: str
+    severity: str
+    ps_command: str
+    target_key: str
+    expected_value: Any
+    mitre_tactic: str
+    mitre_technique: str
+    mitre_name: str
+    risk_explanation: str
+    remediation_command: str
+
+
+class TestQueryPayload(BaseModel):
+    ps_command: str
+    target_key: Optional[str] = None
 
 
 class ScanHistoryItem(BaseModel):
@@ -289,6 +378,274 @@ async def get_rules():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load rules: {str(e)}")
 
+
+# ── Rule Management: helper ──────────────────────────────────────────────────
+
+def _load_rules_raw() -> List[Dict]:
+    """Load rules.yaml and guarantee every entry has an 'enabled' flag."""
+    if not RULES_PATH.exists():
+        return []
+    with open(RULES_PATH, "r", encoding="utf-8") as f:
+        rules = yaml.safe_load(f) or []
+    for r in rules:
+        r.setdefault("enabled", True)
+        r.setdefault("source", "builtin")
+    return rules
+
+def _save_rules_raw(rules: List[Dict]) -> None:
+    """Atomically persist rule list back to rules.yaml."""
+    import tempfile, os
+    tmp = str(RULES_PATH) + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        yaml.dump(rules, f, allow_unicode=True, sort_keys=False, default_flow_style=False)
+    os.replace(tmp, str(RULES_PATH))
+
+# ── Rule Management Endpoints ────────────────────────────────────────────────
+
+@app.get("/api/rules/manage", response_model=List[Dict[str, Any]])
+async def get_rules_manage():
+    """
+    Get ALL rules (including disabled ones) with full management metadata.
+    Used by the Rule Studio interface for toggle, edit, delete operations.
+    """
+    try:
+        return _load_rules_raw()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load rules: {str(e)}")
+
+
+@app.post("/api/rules", response_model=Dict[str, Any], status_code=201)
+async def create_rule(payload: RuleCreate):
+    """Create a new audit rule and append it to rules.yaml."""
+    rules = _load_rules_raw()
+
+    # Ensure unique rule_id
+    existing_ids = {r["rule_id"] for r in rules}
+    if payload.rule_id in existing_ids:
+        raise HTTPException(status_code=409, detail=f"Rule ID '{payload.rule_id}' already exists.")
+
+    # Validate severity
+    if payload.severity not in ("CRITICAL", "HIGH", "MEDIUM", "LOW"):
+        raise HTTPException(status_code=422, detail="Severity must be CRITICAL, HIGH, MEDIUM, or LOW.")
+
+    new_rule = payload.model_dump()
+    new_rule["enabled"] = True
+    rules.append(new_rule)
+    _save_rules_raw(rules)
+    return {"status": "created", "rule_id": payload.rule_id, "total_rules": len(rules)}
+
+
+@app.put("/api/rules/{rule_id}", response_model=Dict[str, Any])
+async def update_rule(rule_id: str, payload: RuleUpdate):
+    """Update an existing rule's properties (any subset of fields)."""
+    rules = _load_rules_raw()
+    idx = next((i for i, r in enumerate(rules) if r["rule_id"] == rule_id), None)
+    if idx is None:
+        raise HTTPException(status_code=404, detail=f"Rule '{rule_id}' not found.")
+
+    updates = {k: v for k, v in payload.model_dump().items() if v is not None}
+    rules[idx].update(updates)
+    _save_rules_raw(rules)
+    return {"status": "updated", "rule_id": rule_id, "updated_fields": list(updates.keys())}
+
+
+@app.patch("/api/rules/{rule_id}/toggle", response_model=Dict[str, Any])
+async def toggle_rule(rule_id: str):
+    """Toggle the enabled/disabled state of a rule without deleting it."""
+    rules = _load_rules_raw()
+    idx = next((i for i, r in enumerate(rules) if r["rule_id"] == rule_id), None)
+    if idx is None:
+        raise HTTPException(status_code=404, detail=f"Rule '{rule_id}' not found.")
+
+    rules[idx]["enabled"] = not rules[idx].get("enabled", True)
+    _save_rules_raw(rules)
+    return {
+        "status": "toggled",
+        "rule_id": rule_id,
+        "enabled": rules[idx]["enabled"],
+        "active_rules": sum(1 for r in rules if r.get("enabled", True)),
+        "total_rules": len(rules)
+    }
+
+
+@app.delete("/api/rules/{rule_id}", response_model=Dict[str, Any])
+async def delete_rule(rule_id: str):
+    """Permanently delete a rule from rules.yaml."""
+    rules = _load_rules_raw()
+    original_len = len(rules)
+    rules = [r for r in rules if r["rule_id"] != rule_id]
+    if len(rules) == original_len:
+        raise HTTPException(status_code=404, detail=f"Rule '{rule_id}' not found.")
+    _save_rules_raw(rules)
+    return {"status": "deleted", "rule_id": rule_id, "remaining_rules": len(rules)}
+
+
+@app.post("/api/rules/reset", response_model=Dict[str, Any])
+async def reset_rules_to_default():
+    """
+    Reset rules.yaml to the factory default (rules_default.yaml).
+    All custom additions and edits are reverted. Disabled rules are re-enabled.
+    """
+    if not RULES_DEFAULT_PATH.exists():
+        raise HTTPException(status_code=500, detail="Factory default rules file (rules_default.yaml) not found.")
+
+    shutil.copy2(str(RULES_DEFAULT_PATH), str(RULES_PATH))
+    rules = _load_rules_raw()
+    return {
+        "status": "reset",
+        "message": "Rules reset to factory CIS defaults.",
+        "total_rules": len(rules),
+        "active_rules": sum(1 for r in rules if r.get("enabled", True))
+    }
+
+
+# ── Benchmark Catalog Endpoints ──────────────────────────────────────────────
+
+@app.get("/api/benchmarks/catalog", response_model=List[Dict[str, Any]])
+async def get_benchmark_catalog(
+    family: Optional[str] = None,
+    severity: Optional[str] = None,
+    search: Optional[str] = None
+):
+    """
+    Retrieve the curated Benchmark Catalog (CIS / NIST / DISA STIG / MITRE ATT&CK).
+    Supports filtering by benchmark family, severity, and free-text search.
+    """
+    if not BENCHMARKS_CATALOG_PATH.exists():
+        raise HTTPException(status_code=500, detail="Benchmark catalog not found at benchmarks/catalog.json.")
+
+    with open(BENCHMARKS_CATALOG_PATH, "r", encoding="utf-8") as f:
+        catalog = json.load(f)
+
+    if isinstance(family, str) and family:
+        catalog = [c for c in catalog if family.lower() in c["benchmark_family"].lower()]
+    if isinstance(severity, str) and severity:
+        catalog = [c for c in catalog if c["severity"].upper() == severity.upper()]
+    if isinstance(search, str) and search:
+        q = search.lower()
+        catalog = [c for c in catalog if
+                   q in c.get("name", "").lower() or
+                   q in c.get("cis_reference", "").lower() or
+                   q in c.get("nist_control", "").lower() or
+                   q in c.get("mitre_technique", "").lower() or
+                   q in c.get("risk_explanation", "").lower()]
+
+    return catalog
+
+
+@app.post("/api/benchmarks/import/{catalog_id}", response_model=Dict[str, Any])
+async def import_benchmark_rule(catalog_id: str):
+    """
+    Import a pre-defined benchmark rule from the catalog directly into active rules.yaml.
+    The rule's catalog_id is used to generate the rule_id (prefixed CUST-).
+    """
+    if not BENCHMARKS_CATALOG_PATH.exists():
+        raise HTTPException(status_code=500, detail="Benchmark catalog not found.")
+
+    with open(BENCHMARKS_CATALOG_PATH, "r", encoding="utf-8") as f:
+        catalog = json.load(f)
+
+    item = next((c for c in catalog if c["catalog_id"] == catalog_id), None)
+    if not item is not None:
+        item = next((c for c in catalog if c["catalog_id"] == catalog_id), None)
+    if item is None:
+        raise HTTPException(status_code=404, detail=f"Catalog item '{catalog_id}' not found.")
+
+    rules = _load_rules_raw()
+
+    # Derive a safe rule_id from the catalog_id
+    proposed_id = f"CUST-{catalog_id.replace('/', '-').replace(' ', '-')}"
+    existing_ids = {r["rule_id"] for r in rules}
+    if proposed_id in existing_ids:
+        raise HTTPException(status_code=409, detail=f"Rule derived from catalog '{catalog_id}' already imported as '{proposed_id}'.")
+
+    # Determine source family tag
+    fam = item.get("benchmark_family", "custom")
+    source_map = {"CIS Benchmark": "cis", "NIST SP 800-53": "nist", "DISA STIG": "stig", "MITRE ATT&CK Mitigation": "mitre"}
+    source = source_map.get(fam, "custom")
+
+    new_rule = {
+        "rule_id": proposed_id,
+        "category": item["category"],
+        "description": item["name"],
+        "ps_command": item["ps_command"],
+        "target_key": item["target_key"],
+        "expected_value": item["expected_value"],
+        "severity": item["severity"],
+        "risk_explanation": item.get("risk_explanation", ""),
+        "remediation_command": item.get("remediation_command", ""),
+        "cis_reference": item.get("cis_reference", "N/A"),
+        "nist_control": item.get("nist_control", "N/A"),
+        "stig_id": item.get("stig_id", "N/A"),
+        "mitre_tactic": item.get("mitre_tactic", "N/A"),
+        "mitre_technique": item.get("mitre_technique", "N/A"),
+        "mitre_name": item.get("mitre_name", "N/A"),
+        "enabled": True,
+        "source": source,
+    }
+
+    rules.append(new_rule)
+    _save_rules_raw(rules)
+
+    return {
+        "status": "imported",
+        "rule_id": proposed_id,
+        "catalog_id": catalog_id,
+        "source": source,
+        "total_rules": len(rules),
+        "active_rules": sum(1 for r in rules if r.get("enabled", True))
+    }
+
+
+@app.post("/api/rules/test-query", response_model=Dict[str, Any])
+async def test_powershell_query(payload: TestQueryPayload):
+    """
+    Dry-run a PowerShell inspection command and return raw output.
+    Used by the Rule Studio 'Test Query' button before saving a custom rule.
+    """
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", payload.ps_command],
+            capture_output=True, text=True, timeout=15
+        )
+        raw = result.stdout.strip()
+        parsed = None
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, dict) and payload.target_key:
+                value = parsed.get(payload.target_key)
+            else:
+                value = parsed
+        except Exception:
+            value = raw
+
+        return {
+            "success": result.returncode == 0,
+            "raw_output": raw,
+            "parsed_value": value,
+            "stderr": result.stderr.strip() or None
+        }
+    except Exception as e:
+        return {"success": False, "raw_output": "", "parsed_value": None, "stderr": str(e)}
+
+
+@app.get("/api/rules/stats", response_model=Dict[str, Any])
+async def get_rules_stats():
+    """Get summary statistics about the current rule set."""
+    rules = _load_rules_raw()
+    from collections import Counter
+    sev_counter = Counter(r.get("severity", "N/A") for r in rules if r.get("enabled", True))
+    cat_counter = Counter(r.get("category", "N/A") for r in rules if r.get("enabled", True))
+    src_counter = Counter(r.get("source", "builtin") for r in rules)
+    return {
+        "total_rules": len(rules),
+        "active_rules": sum(1 for r in rules if r.get("enabled", True)),
+        "disabled_rules": sum(1 for r in rules if not r.get("enabled", True)),
+        "by_severity": dict(sev_counter),
+        "by_category": dict(cat_counter),
+        "by_source": dict(src_counter)
+    }
 
 @app.get("/api/history", response_model=List[ScanHistoryItem])
 async def get_scan_history(limit: int = Query(20, ge=1, le=100)):

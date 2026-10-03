@@ -104,9 +104,18 @@ def run_powershell(command: str):
     except json.JSONDecodeError:
         return False, f"Failed to parse JSON: {stdout[:200]}"
 
-def run_powershell_demo(rule_id: str):
+def run_powershell_demo(rule_id: str, rule: dict = None):
+    """Return mock PowerShell output for demo mode.
+    Built-in rules use DEMO_RESPONSES; custom/catalog rules synthesize a
+    compliant mock response from the rule's expected_value and target_key.
+    """
     if rule_id in DEMO_RESPONSES:
         return True, DEMO_RESPONSES[rule_id]
+    # Dynamic fallback for custom or catalog-imported rules — simulate a PASS
+    if rule is not None:
+        target_key = rule.get("target_key", "value")
+        expected = rule.get("expected_value")
+        return True, {target_key: expected}
     return False, "No demo data registered for this rule"
 
 # ---------------------------------------------------------------------------
@@ -153,7 +162,7 @@ GPO_UNCONFIGURED_DEFAULTS = {
 def evaluate_rule(rule, demo=False):
     rule_id = rule["rule_id"]
     t0 = time.perf_counter()
-    ok, payload = (run_powershell_demo(rule_id) if demo else run_powershell(rule["ps_command"]))
+    ok, payload = (run_powershell_demo(rule_id, rule) if demo else run_powershell(rule["ps_command"]))
     duration = time.perf_counter() - t0
     rule_time = round(duration, 2) if duration >= 0.05 else round(max(duration, 0.001), 3)
 
@@ -194,23 +203,26 @@ def evaluate_rule(rule, demo=False):
     return base
 
 def run_audit(rules, demo=False):
+    # Filter to only active (enabled) rules — disabled rules are excluded from scan & score
+    active_rules = [r for r in rules if r.get("enabled", True)]
+
     if demo:
-        return [evaluate_rule(r, demo=True) for r in rules]
+        return [evaluate_rule(r, demo=True) for r in active_rules]
 
     results_dict = {}
     with Progress(TextColumn("[bold cyan]Auditing[/bold cyan]"), BarColumn(),
                    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
                    TimeElapsedColumn(), console=console) as progress:
-        task = progress.add_task("scan", total=len(rules))
-        max_workers = min(24, len(rules))
+        task = progress.add_task("scan", total=len(active_rules))
+        max_workers = min(24, max(1, len(active_rules)))
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_idx = {executor.submit(evaluate_rule, rule, demo=False): idx for idx, rule in enumerate(rules)}
+            future_to_idx = {executor.submit(evaluate_rule, rule, demo=False): idx for idx, rule in enumerate(active_rules)}
             for future in as_completed(future_to_idx):
                 idx = future_to_idx[future]
                 results_dict[idx] = future.result()
                 progress.advance(task)
 
-    return [results_dict[i] for i in range(len(rules))]
+    return [results_dict[i] for i in range(len(active_rules))]
 
 # ---------------------------------------------------------------------------
 # Scoring helpers

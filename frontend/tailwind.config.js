@@ -12,16 +12,16 @@ export default {
       },
       colors: {
         cyber: {
-          950: '#04090d', // Deepest cyber void
-          900: '#071219', // Main dark canvas
-          850: '#0b1922', // Card background
-          800: '#10222e', // Elevated panel
-          750: '#152c3c', // Interactive component
-          700: '#1b374b', // Borders & dividers
-          600: '#254b66',
-          500: '#34668a',
-          400: '#528cb5',
-          300: '#8bb8d9',
+          950: '#0a1520', // Base deep cyber background
+          900: '#0f1f2e', // Main canvas background
+          850: '#162a3d', // Card & tile background
+          800: '#1d364e', // Elevated panels & headers
+          750: '#254360', // Interactive components
+          700: '#2f5376', // Borders & dividers
+          600: '#3d6994', // Accent borders
+          500: '#4f82b3',
+          400: '#699fcb',
+          300: '#90bde3',
           200: '#c2ddf0',
           100: '#e5f2fa',
         },

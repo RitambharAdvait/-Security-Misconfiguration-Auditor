@@ -6,7 +6,9 @@ import {
   Shield, AlertTriangle, CheckCircle, XCircle, RefreshCw, Activity,
   Download, Search, X, Copy, Check, PlayCircle,
   History, Printer, Clock, Eye, ArrowRight, Lock,
-  GitCompare, ArrowUpRight, ArrowDownRight, Zap, TrendingUp, TrendingDown
+  GitCompare, ArrowUpRight, ArrowDownRight, Zap, TrendingUp, TrendingDown,
+  Sliders, Plus, Edit2, Trash2, RotateCcw, BookOpen, Layers, Terminal, Sparkles, Filter, Database, FileText,
+  LayoutDashboard, ChevronLeft, ChevronRight, FileCode, CheckSquare, Award, Menu, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -214,7 +216,7 @@ function ComplianceHistoryChart({ data }) {
 }
 
 // History Drawer Component
-function HistoryDrawer({ onClose, onSelectScan }) {
+function HistoryDrawer({ onClose, onSelectScan, isInline = false }) {
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -632,48 +634,49 @@ function HistoryDrawer({ onClose, onSelectScan }) {
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden no-print">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
-        onClick={onClose}
-      />
+  const containerClasses = isInline
+    ? "w-full flex-1 flex flex-col bg-cyber-900 border border-cyber-700/80 rounded-2xl text-slate-100 shadow-xl overflow-y-auto min-h-0"
+    : "absolute right-0 top-0 h-full w-full max-w-2xl bg-cyber-900 border-l border-cyber-700 text-slate-100 shadow-2xl overflow-y-auto animate-slide-in"
 
-      {/* Drawer */}
-      <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-cyber-900 border-l border-cyber-700 text-slate-100 shadow-2xl overflow-y-auto animate-slide-in">
-        <div className="sticky top-0 bg-cyber-950 border-b border-cyber-800 text-white px-6 py-4 flex items-center justify-between z-10">
-          <div className="flex items-center gap-3">
-            <History className="w-6 h-6 text-neon-green" />
-            <h2 className="text-xl font-bold font-sans">Audit History</h2>
+  const innerContent = (
+    <div className={containerClasses}>
+      <div className="sticky top-0 bg-cyber-950 border-b border-cyber-800 text-white px-6 py-4 flex items-center justify-between z-10 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <History className="w-6 h-6 text-neon-green" />
+          <div>
+            <h2 className="text-xl font-bold font-sans">Audit History Log</h2>
+            <p className="text-xs text-slate-400 font-mono">Historical scans, compliance trends, and Anti-TOCTOU cryptographic seals</p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={downloadHistoryPdf}
-              disabled={filteredHistory.length === 0}
-              className="cyber-btn-glow flex items-center gap-1.5 bg-neon-green hover:bg-neon-mint text-cyber-950 text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-[0_0_12px_rgba(0,255,157,0.3)] disabled:opacity-50"
-              title="Download complete history log directly as a PDF file"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Download PDF</span>
-            </button>
-            <button
-              onClick={exportHistoryToPdf}
-              disabled={filteredHistory.length === 0}
-              className="flex items-center gap-1.5 bg-cyber-850 hover:bg-cyber-800 text-slate-200 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-cyber-700 transition shadow-sm disabled:opacity-50"
-              title="Print or view print preview"
-            >
-              <Printer className="w-3.5 h-3.5 text-slate-300" />
-              <span>Print</span>
-            </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={downloadHistoryPdf}
+            disabled={filteredHistory.length === 0}
+            className="cyber-btn-glow flex items-center gap-1.5 bg-neon-green hover:bg-neon-mint text-cyber-950 text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-[0_0_12px_rgba(0,255,157,0.3)] disabled:opacity-50"
+            title="Download complete history log directly as a PDF file"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Download PDF</span>
+          </button>
+          <button
+            onClick={exportHistoryToPdf}
+            disabled={filteredHistory.length === 0}
+            className="flex items-center gap-1.5 bg-cyber-850 hover:bg-cyber-800 text-slate-200 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-cyber-700 transition shadow-sm disabled:opacity-50"
+            title="Print or view print preview"
+          >
+            <Printer className="w-3.5 h-3.5 text-slate-300" />
+            <span>Print</span>
+          </button>
+          {onClose && (
             <button
               onClick={onClose}
               className="p-1.5 hover:bg-cyber-800 rounded-lg transition text-slate-400 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
-          </div>
+          )}
         </div>
+      </div>
 
         <div className="p-6">
           {loading ? (
@@ -816,7 +819,24 @@ function HistoryDrawer({ onClose, onSelectScan }) {
             </div>
           )}
         </div>
+    </div>
+  )
+
+  if (isInline) {
+    return (
+      <div className="w-full flex-1 flex flex-col min-h-0">
+        {innerContent}
       </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden no-print">
+      <div
+        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
+        onClick={onClose}
+      />
+      {innerContent}
     </div>
   )
 }
@@ -1003,7 +1023,7 @@ function RemediationDrawer({ rule, onClose }) {
 }
 
 // Attestation Drawer Component
-function AttestationDrawer({ auditData, onClose, verificationResult, verifying, onVerify }) {
+function AttestationDrawer({ auditData, onClose, verificationResult, verifying, onVerify, isInline = false }) {
   const [copiedHash, setCopiedHash] = useState(false)
   const [copiedKey, setCopiedKey] = useState(false)
   const [showKey, setShowKey] = useState(false)
@@ -1026,36 +1046,47 @@ function AttestationDrawer({ auditData, onClose, verificationResult, verifying, 
     }
   }
 
-  if (!seal) return null
-
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden no-print">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Drawer */}
-      <div className="absolute right-0 top-0 h-full w-full max-w-xl bg-cyber-900 border-l border-cyber-700 text-slate-100 shadow-2xl overflow-y-auto animate-slide-in flex flex-col">
-        {/* Drawer Header */}
-        <div className="sticky top-0 bg-cyber-950 border-b border-cyber-800 text-white px-6 py-4 flex items-center justify-between z-10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-neon-green/10 border border-neon-green/20 rounded-xl text-neon-green">
-              <Shield className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white leading-tight font-sans">Cryptographic Attestation Seal</h2>
-              <p className="text-xs text-slate-400 font-mono">ASArP Section 6 • Anti-TOCTOU Root of Trust</p>
-            </div>
+  if (!seal) {
+    if (isInline) {
+      return (
+        <div className="w-full flex-1 flex items-center justify-center p-8 bg-cyber-900 border border-cyber-700 rounded-2xl min-h-[400px]">
+          <div className="text-center max-w-md">
+            <Lock className="w-12 h-12 text-neon-green/60 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2">No Attestation Seal Attached</h3>
+            <p className="text-xs text-slate-400 font-mono">Run an audit scan to automatically generate and verify an RSA-2048 cryptographic seal adhering to the ASArP Anti-TOCTOU framework.</p>
           </div>
+        </div>
+      )
+    }
+    return null
+  }
+
+  const containerClasses = isInline
+    ? "w-full flex-1 flex flex-col bg-cyber-900 border border-cyber-700/80 rounded-2xl text-slate-100 shadow-xl overflow-y-auto min-h-0"
+    : "absolute right-0 top-0 h-full w-full max-w-xl bg-cyber-900 border-l border-cyber-700 text-slate-100 shadow-2xl overflow-y-auto animate-slide-in flex flex-col"
+
+  const innerContent = (
+    <div className={containerClasses}>
+      {/* Drawer Header */}
+      <div className="sticky top-0 bg-cyber-950 border-b border-cyber-800 text-white px-6 py-4 flex items-center justify-between z-10 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-neon-green/10 border border-neon-green/20 rounded-xl text-neon-green">
+            <Shield className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white leading-tight font-sans">Cryptographic Attestation Seal</h2>
+            <p className="text-xs text-slate-400 font-mono">ASArP Section 6 • Anti-TOCTOU Root of Trust</p>
+          </div>
+        </div>
+        {onClose && (
           <button
             onClick={onClose}
             className="p-1.5 hover:bg-cyber-800 rounded-lg transition text-slate-400 hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
+        )}
+      </div>
 
         {/* Content Body */}
         <div className="p-6 space-y-6 flex-1 text-slate-200">
@@ -1217,13 +1248,30 @@ function AttestationDrawer({ auditData, onClose, verificationResult, verifying, 
             </p>
           </div>
         </div>
+    </div>
+  )
+
+  if (isInline) {
+    return (
+      <div className="w-full flex-1 flex flex-col min-h-0">
+        {innerContent}
       </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden no-print">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+      {innerContent}
     </div>
   )
 }
 
 // Compare Modal Component
-function CompareModal({ onClose, currentScanId }) {
+function CompareModal({ onClose, currentScanId, isInline = false }) {
   const [historyList, setHistoryList] = useState([])
   const [baseId, setBaseId] = useState('')
   const [targetId, setTargetId] = useState('')
@@ -1321,35 +1369,39 @@ function CompareModal({ onClose, currentScanId }) {
     return true
   })
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 no-print">
-      <div className="bg-cyber-900 w-full max-w-6xl rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden border border-cyber-700 animate-slide-in text-slate-100">
-        
-        {/* Header */}
-        <div className="bg-cyber-950 text-white px-6 py-4 flex items-center justify-between border-b border-cyber-800 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-neon-green/10 border border-neon-green/20 rounded-xl text-neon-green">
-              <GitCompare className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white leading-tight flex items-center gap-2 font-sans">
-                <span>Audit Comparison & Performance Evaluation</span>
-                <span className="text-[10px] bg-neon-green/15 text-neon-green border border-neon-green/30 px-2 py-0.5 rounded font-mono font-semibold uppercase tracking-wider">
-                  ASArP Drift Analytics
-                </span>
-              </h2>
-              <p className="text-xs text-slate-400 font-mono">
-                Comparative Compliance Delta, Rule Differencing & Multi-Thread Engine Benchmark
-              </p>
-            </div>
+  const containerClasses = isInline
+    ? "bg-cyber-900 w-full flex-1 rounded-2xl shadow-xl flex flex-col overflow-hidden border border-cyber-700/80 text-slate-100 min-h-0"
+    : "bg-cyber-900 w-full max-w-6xl rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden border border-cyber-700 animate-slide-in text-slate-100"
+
+  const innerContent = (
+    <div className={containerClasses}>
+      {/* Header */}
+      <div className="bg-cyber-950 text-white px-6 py-4 flex items-center justify-between border-b border-cyber-800 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-neon-green/10 border border-neon-green/20 rounded-xl text-neon-green">
+            <GitCompare className="w-5 h-5" />
           </div>
+          <div>
+            <h2 className="text-lg font-bold text-white leading-tight flex items-center gap-2 font-sans">
+              <span>Audit Comparison & Performance Evaluation</span>
+              <span className="text-[10px] bg-neon-green/15 text-neon-green border border-neon-green/30 px-2 py-0.5 rounded font-mono font-semibold uppercase tracking-wider">
+                ASArP Drift Analytics
+              </span>
+            </h2>
+            <p className="text-xs text-slate-400 font-mono">
+              Comparative Compliance Delta, Rule Differencing & Multi-Thread Engine Benchmark
+            </p>
+          </div>
+        </div>
+        {onClose && (
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-cyber-800 rounded-lg transition text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-cyber-800 transition"
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
+        )}
+      </div>
 
         {/* Scan Selector Ribbon */}
         <div className="bg-cyber-850 border-b border-cyber-750 px-6 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4 flex-shrink-0">
@@ -1663,15 +1715,15 @@ function CompareModal({ onClose, currentScanId }) {
               <div className="cyber-tile overflow-hidden shadow-sm">
                 <div className="overflow-x-auto max-h-[380px]">
                   <table className="w-full text-left text-xs font-mono">
-                    <thead className="bg-cyber-850 text-slate-300 font-bold border-b border-cyber-700 sticky top-0 z-10 text-[11px] uppercase tracking-wider">
+                    <thead className="bg-cyber-800 text-white font-extrabold border-b-2 border-cyber-600 sticky top-0 z-10 text-xs uppercase tracking-wider shadow-sm">
                       <tr>
-                        <th className="py-2.5 px-3 text-center w-12">#</th>
-                        <th className="py-2.5 px-3 w-32">Rule ID</th>
-                        <th className="py-2.5 px-3">Description & Category</th>
-                        <th className="py-2.5 px-3 text-center w-28">Baseline (A)</th>
-                        <th className="py-2.5 px-3 text-center w-28">Target (B)</th>
-                        <th className="py-2.5 px-3 text-center w-28">Latency Delta</th>
-                        <th className="py-2.5 px-3 text-center w-36">Classification</th>
+                        <th className="py-3 px-3 text-center w-12 text-white font-extrabold">#</th>
+                        <th className="py-3 px-3 w-32 text-white font-extrabold">RULE ID</th>
+                        <th className="py-3 px-3 text-white font-extrabold">DESCRIPTION & CATEGORY</th>
+                        <th className="py-3 px-3 text-center w-28 text-white font-extrabold">BASELINE (A)</th>
+                        <th className="py-3 px-3 text-center w-28 text-white font-extrabold">TARGET (B)</th>
+                        <th className="py-3 px-3 text-center w-28 text-white font-extrabold">LATENCY DELTA</th>
+                        <th className="py-3 px-3 text-center w-36 text-white font-extrabold">CLASSIFICATION</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-cyber-800">
@@ -1806,6 +1858,1317 @@ function CompareModal({ onClose, currentScanId }) {
           ) : null}
         </div>
       </div>
+  )
+
+  if (isInline) {
+    return (
+      <div className="w-full flex-1 flex flex-col min-h-0">
+        {innerContent}
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 no-print">
+      {innerContent}
+    </div>
+  )
+}
+// ═════════════════════════════════════════════════════════════════════════════
+// Rule Management & Benchmark Studio Component
+// ═════════════════════════════════════════════════════════════════════════════
+function RuleStudioModal({ onClose, onRulesChanged, isInline = false }) {
+  const [activeTab, setActiveTab] = useState('rules') // 'rules' | 'catalog' | 'form'
+  const [rules, setRules] = useState([])
+  const [catalog, setCatalog] = useState([])
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [catalogLoading, setCatalogLoading] = useState(false)
+  const [toast, setToast] = useState(null)
+  const [confirmReset, setConfirmReset] = useState(false)
+
+  // Rules Tab Filter & Search
+  const [searchQuery, setSearchQuery] = useState('')
+  const [catFilter, setCatFilter] = useState('all')
+  const [sevFilter, setSevFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all') // 'all' | 'enabled' | 'disabled' | 'custom'
+
+  // Catalog Tab Filter & Search
+  const [catalogSearch, setCatalogSearch] = useState('')
+  const [catalogFamily, setCatalogFamily] = useState('all')
+  const [catalogSeverity, setCatalogSeverity] = useState('all')
+
+  // Edit / Create Form State
+  const [editingRuleId, setEditingRuleId] = useState(null)
+  const [formData, setFormData] = useState({
+    rule_id: '',
+    category: 'Privilege Escalation',
+    description: '',
+    severity: 'HIGH',
+    ps_command: '',
+    target_key: '',
+    expected_value: 1,
+    value_type: 'number',
+    cis_reference: 'CIS Microsoft Windows 11 v2.0.0',
+    nist_control: 'AC-6',
+    stig_id: 'WN11-CUSTOM',
+    mitre_tactic: 'Privilege Escalation',
+    mitre_technique: 'T1548.002',
+    mitre_name: 'Bypass User Account Control',
+    risk_explanation: '',
+    remediation_command: ''
+  })
+  const [selectedPresetId, setSelectedPresetId] = useState('')
+  const [testQuery, setTestQuery] = useState({ loading: false, result: null, error: null })
+
+  const showToast = (type, text) => {
+    setToast({ type, text })
+    setTimeout(() => setToast(null), 3800)
+  }
+
+  const fetchRules = async () => {
+    try {
+      setLoading(true)
+      const res = await axios.get(`${API_BASE_URL}/api/rules/manage`)
+      setRules(res.data)
+      const statsRes = await axios.get(`${API_BASE_URL}/api/rules/stats`)
+      setStats(statsRes.data)
+    } catch (err) {
+      showToast('error', `Failed to load rules: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchCatalog = async () => {
+    try {
+      setCatalogLoading(true)
+      const res = await axios.get(`${API_BASE_URL}/api/benchmarks/catalog`)
+      setCatalog(res.data)
+    } catch (err) {
+      showToast('error', `Failed to load benchmark catalog: ${err.message}`)
+    } finally {
+      setCatalogLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRules()
+    fetchCatalog()
+  }, [])
+
+  const handleToggle = async (ruleId) => {
+    try {
+      const res = await axios.patch(`${API_BASE_URL}/api/rules/${ruleId}/toggle`)
+      setRules(prev => prev.map(r => r.rule_id === ruleId ? { ...r, enabled: res.data.enabled } : r))
+      showToast('success', `Rule ${ruleId} is now ${res.data.enabled ? 'Enabled' : 'Disabled'}`)
+      const statsRes = await axios.get(`${API_BASE_URL}/api/rules/stats`)
+      setStats(statsRes.data)
+      if (onRulesChanged) onRulesChanged()
+    } catch (err) {
+      showToast('error', `Toggle failed: ${err.message}`)
+    }
+  }
+
+  const handleDelete = async (ruleId) => {
+    if (!window.confirm(`Are you sure you want to permanently delete rule '${ruleId}' from rules.yaml?`)) return
+    try {
+      await axios.delete(`${API_BASE_URL}/api/rules/${ruleId}`)
+      setRules(prev => prev.filter(r => r.rule_id !== ruleId))
+      showToast('success', `Deleted rule ${ruleId}`)
+      const statsRes = await axios.get(`${API_BASE_URL}/api/rules/stats`)
+      setStats(statsRes.data)
+      if (onRulesChanged) onRulesChanged()
+    } catch (err) {
+      showToast('error', `Delete failed: ${err.message}`)
+    }
+  }
+
+  const handleReset = async () => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/rules/reset`)
+      setConfirmReset(false)
+      showToast('success', res.data.message)
+      await fetchRules()
+      if (onRulesChanged) onRulesChanged()
+    } catch (err) {
+      showToast('error', `Reset failed: ${err.message}`)
+    }
+  }
+
+  const handleImport = async (catalogId) => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/benchmarks/import/${catalogId}`)
+      showToast('success', `Imported '${catalogId}' as ${res.data.rule_id}!`)
+      await fetchRules()
+      if (onRulesChanged) onRulesChanged()
+    } catch (err) {
+      showToast('error', err.response?.data?.detail || err.message)
+    }
+  }
+
+  const startEditRule = (rule) => {
+    let vType = 'string'
+    if (typeof rule.expected_value === 'boolean') vType = 'boolean'
+    else if (typeof rule.expected_value === 'number') vType = 'number'
+
+    setEditingRuleId(rule.rule_id)
+    setFormData({
+      rule_id: rule.rule_id,
+      category: rule.category || 'Privilege Escalation',
+      description: rule.description || '',
+      severity: rule.severity || 'HIGH',
+      ps_command: rule.ps_command || '',
+      target_key: rule.target_key || '',
+      expected_value: rule.expected_value !== undefined ? rule.expected_value : '',
+      value_type: vType,
+      cis_reference: rule.cis_reference || 'N/A',
+      nist_control: rule.nist_control || 'N/A',
+      stig_id: rule.stig_id || 'N/A',
+      mitre_tactic: rule.mitre_tactic || 'N/A',
+      mitre_technique: rule.mitre_technique || 'N/A',
+      mitre_name: rule.mitre_name || 'N/A',
+      risk_explanation: rule.risk_explanation || '',
+      remediation_command: rule.remediation_command || ''
+    })
+    setTestQuery({ loading: false, result: null, error: null })
+    setActiveTab('form')
+  }
+
+  const startCreateRule = () => {
+    setEditingRuleId(null)
+    setSelectedPresetId('')
+    setFormData({
+      rule_id: `CUST-RULE-${String(rules.length + 1).padStart(3, '0')}`,
+      category: 'Privilege Escalation',
+      description: '',
+      severity: 'HIGH',
+      ps_command: '',
+      target_key: '',
+      expected_value: 1,
+      value_type: 'number',
+      cis_reference: 'Custom CIS Windows Benchmark',
+      nist_control: 'AC-6',
+      stig_id: 'WN11-CUSTOM',
+      mitre_tactic: 'Privilege Escalation',
+      mitre_technique: 'T1548.002',
+      mitre_name: 'Bypass User Account Control',
+      risk_explanation: '',
+      remediation_command: ''
+    })
+    setTestQuery({ loading: false, result: null, error: null })
+    setActiveTab('form')
+  }
+
+  const applyPreset = (catalogId) => {
+    setSelectedPresetId(catalogId)
+    const item = catalog.find(c => c.catalog_id === catalogId)
+    if (!item) return
+
+    let vType = 'string'
+    if (typeof item.expected_value === 'boolean') vType = 'boolean'
+    else if (typeof item.expected_value === 'number') vType = 'number'
+
+    setFormData({
+      rule_id: editingRuleId || `CUST-${item.catalog_id.replace('/', '-').replace(' ', '-')}`,
+      category: item.category || 'Privilege Escalation',
+      description: item.name || '',
+      severity: item.severity || 'HIGH',
+      ps_command: item.ps_command || '',
+      target_key: item.target_key || '',
+      expected_value: item.expected_value !== undefined ? item.expected_value : '',
+      value_type: vType,
+      cis_reference: item.cis_reference || 'N/A',
+      nist_control: item.nist_control || 'N/A',
+      stig_id: item.stig_id || 'N/A',
+      mitre_tactic: item.mitre_tactic || 'N/A',
+      mitre_technique: item.mitre_technique || 'N/A',
+      mitre_name: item.mitre_name || 'N/A',
+      risk_explanation: item.risk_explanation || '',
+      remediation_command: item.remediation_command || ''
+    })
+    showToast('success', `Autofilled form from preset: ${item.name}`)
+  }
+
+  const handleTestQuery = async () => {
+    if (!formData.ps_command) {
+      showToast('error', 'Please enter a PowerShell command first.')
+      return
+    }
+    setTestQuery({ loading: true, result: null, error: null })
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/rules/test-query`, {
+        ps_command: formData.ps_command,
+        target_key: formData.target_key || null
+      })
+      setTestQuery({ loading: false, result: res.data, error: null })
+    } catch (err) {
+      setTestQuery({ loading: false, result: null, error: err.message })
+    }
+  }
+
+  const handleSaveRule = async (e) => {
+    e.preventDefault()
+    if (!formData.rule_id || !formData.description || !formData.ps_command) {
+      showToast('error', 'Please fill in required fields: Rule ID, Description, and PowerShell Command.')
+      return
+    }
+
+    let parsedExpected = formData.expected_value
+    if (formData.value_type === 'boolean') {
+      parsedExpected = String(formData.expected_value).toLowerCase() === 'true'
+    } else if (formData.value_type === 'number') {
+      const num = Number(formData.expected_value)
+      parsedExpected = isNaN(num) ? formData.expected_value : num
+    }
+
+    const payload = {
+      ...formData,
+      expected_value: parsedExpected
+    }
+    delete payload.value_type
+
+    try {
+      if (editingRuleId) {
+        await axios.put(`${API_BASE_URL}/api/rules/${editingRuleId}`, payload)
+        showToast('success', `Updated rule ${editingRuleId}!`)
+      } else {
+        await axios.post(`${API_BASE_URL}/api/rules`, payload)
+        showToast('success', `Created new rule ${formData.rule_id}!`)
+      }
+      await fetchRules()
+      if (onRulesChanged) onRulesChanged()
+      setActiveTab('rules')
+      setEditingRuleId(null)
+    } catch (err) {
+      showToast('error', err.response?.data?.detail || err.message)
+    }
+  }
+
+  // Filtered Rules list
+  const filteredRules = rules.filter(r => {
+    if (catFilter !== 'all' && r.category !== catFilter) return false
+    if (sevFilter !== 'all' && r.severity !== sevFilter) return false
+    if (statusFilter === 'enabled' && !r.enabled) return false
+    if (statusFilter === 'disabled' && r.enabled) return false
+    if (statusFilter === 'custom' && r.source === 'builtin') return false
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      const inId = (r.rule_id || '').toLowerCase().includes(q)
+      const inDesc = (r.description || '').toLowerCase().includes(q)
+      const inCat = (r.category || '').toLowerCase().includes(q)
+      const inCis = (r.cis_reference || '').toLowerCase().includes(q)
+      const inNist = (r.nist_control || '').toLowerCase().includes(q)
+      const inMitre = (r.mitre_technique || '').toLowerCase().includes(q)
+      if (!inId && !inDesc && !inCat && !inCis && !inNist && !inMitre) return false
+    }
+    return true
+  })
+
+  // Filtered Benchmark Catalog list
+  const filteredCatalog = catalog.filter(c => {
+    if (catalogFamily !== 'all' && !c.benchmark_family.toLowerCase().includes(catalogFamily.toLowerCase())) return false
+    if (catalogSeverity !== 'all' && c.severity !== catalogSeverity) return false
+    if (catalogSearch) {
+      const q = catalogSearch.toLowerCase()
+      const inName = (c.name || '').toLowerCase().includes(q)
+      const inCis = (c.cis_reference || '').toLowerCase().includes(q)
+      const inNist = (c.nist_control || '').toLowerCase().includes(q)
+      const inMitre = (c.mitre_technique || '').toLowerCase().includes(q)
+      const inRisk = (c.risk_explanation || '').toLowerCase().includes(q)
+      if (!inName && !inCis && !inNist && !inMitre && !inRisk) return false
+    }
+    return true
+  })
+
+  // Unique categories for filter dropdown
+  const allCategories = Array.from(new Set(rules.map(r => r.category).filter(Boolean))).sort()
+
+  // Set of existing rule IDs for fast lookup in catalog tab
+  const existingRuleIds = new Set(rules.map(r => r.rule_id))
+
+  const getSeverityBadge = (severity) => {
+    switch (severity) {
+      case 'CRITICAL':
+        return 'bg-rose-950/80 text-rose-300 border-rose-500/60 shadow-[0_0_8px_rgba(244,63,94,0.25)]'
+      case 'HIGH':
+        return 'bg-amber-950/80 text-amber-300 border-amber-500/60 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
+      case 'MEDIUM':
+        return 'bg-yellow-950/80 text-yellow-300 border-yellow-500/60'
+      case 'LOW':
+        return 'bg-cyber-800 text-slate-300 border-cyber-700'
+      default:
+        return 'bg-cyber-800 text-slate-400 border-cyber-700'
+    }
+  }
+
+  const getSourceBadge = (source) => {
+    switch (source) {
+      case 'cis':
+        return 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60'
+      case 'nist':
+        return 'bg-indigo-950/80 text-indigo-300 border-indigo-700/60'
+      case 'stig':
+        return 'bg-purple-950/80 text-purple-300 border-purple-700/60'
+      case 'mitre':
+        return 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
+      case 'custom':
+        return 'bg-neon-green/15 text-neon-green border-neon-green/30'
+      default:
+        return 'bg-cyber-800 text-slate-400 border-cyber-700'
+    }
+  }
+
+  const containerClasses = isInline
+    ? "relative w-full flex-1 bg-cyber-900 border border-cyber-700/80 rounded-2xl text-slate-100 shadow-xl overflow-hidden flex flex-col min-h-0"
+    : "relative w-full max-w-6xl max-h-[92vh] bg-cyber-900 border border-cyber-700 rounded-2xl text-slate-100 shadow-2xl overflow-hidden flex flex-col z-10 animate-slide-in"
+
+  const innerContent = (
+    <div className={containerClasses}>
+      {/* Toast Alert */}
+      {toast && (
+        <div className={`absolute top-4 right-4 z-50 px-4 py-2.5 rounded-xl border text-xs font-semibold shadow-xl flex items-center gap-2 transition-all ${
+          toast.type === 'success'
+            ? 'bg-emerald-950/95 text-neon-green border-neon-green/50 shadow-[0_0_15px_rgba(0,255,157,0.3)]'
+            : 'bg-rose-950/95 text-rose-300 border-rose-500/60 shadow-[0_0_15px_rgba(244,63,94,0.3)]'
+        }`}>
+          {toast.type === 'success' ? <CheckCircle className="w-4 h-4 text-neon-green" /> : <AlertTriangle className="w-4 h-4 text-rose-400" />}
+          <span>{toast.text}</span>
+        </div>
+      )}
+
+      {/* Modal Header */}
+      <div className="sticky top-0 bg-cyber-950 border-b border-cyber-800 px-6 py-4 flex items-center justify-between z-20 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-neon-green/10 border border-neon-green/30 rounded-xl text-neon-green shadow-[0_0_12px_rgba(0,255,157,0.2)]">
+            <Sliders className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-lg font-bold text-white leading-tight font-sans">
+                Rule Studio & Benchmark Customizer
+              </h2>
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-full bg-cyber-850 text-neon-mint border border-cyber-700 font-bold">
+                {stats?.active_rules ?? rules.length} Active / {rules.length} Total Rules
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 font-mono mt-0.5">
+              Customize audit baselines, toggle rules on/off, or map to CIS, NIST & DISA STIG datasets
+            </p>
+          </div>
+        </div>
+
+        {onClose && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="p-1.5 hover:bg-cyber-800 rounded-lg transition text-slate-400 hover:text-white"
+              title="Close Studio"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+      </div>
+
+        {/* Studio Navigation Tabs & Quick Actions */}
+        <div className="bg-cyber-850 border-b border-cyber-750 px-6 py-2.5 flex items-center justify-between flex-wrap gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setActiveTab('rules'); setEditingRuleId(null); }}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                activeTab === 'rules'
+                  ? 'bg-neon-green text-cyber-950 font-bold shadow-[0_0_12px_rgba(0,255,157,0.35)]'
+                  : 'bg-cyber-900 text-slate-300 hover:text-white border border-cyber-700 hover:border-cyber-600'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Active Rules ({rules.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('catalog')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                activeTab === 'catalog'
+                  ? 'bg-neon-green text-cyber-950 font-bold shadow-[0_0_12px_rgba(0,255,157,0.35)]'
+                  : 'bg-cyber-900 text-slate-300 hover:text-white border border-cyber-700 hover:border-cyber-600'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Benchmark Catalog ({catalog.length} Presets)</span>
+            </button>
+
+            <button
+              onClick={startCreateRule}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                activeTab === 'form'
+                  ? 'bg-neon-green text-cyber-950 font-bold shadow-[0_0_12px_rgba(0,255,157,0.35)]'
+                  : 'bg-cyber-900 text-slate-300 hover:text-white border border-cyber-700 hover:border-cyber-600'
+              }`}
+            >
+              <Plus className="w-3.5 h-3.5 text-neon-green" />
+              <span>{editingRuleId ? `Edit Rule (${editingRuleId})` : 'New Custom Rule'}</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setConfirmReset(true)}
+              className="flex items-center gap-1.5 bg-cyber-950 hover:bg-rose-950/60 text-slate-300 hover:text-rose-300 border border-cyber-700 hover:border-rose-800 text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow-sm"
+              title="Reset all rules to the official factory default 50 CIS rules"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
+              <span>Reset to CIS Baseline</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Confirmation Dialog for Factory Reset */}
+        {confirmReset && (
+          <div className="bg-rose-950/90 border-b border-rose-800 px-6 py-3 flex items-center justify-between flex-wrap gap-3 animate-fade-in">
+            <div className="flex items-center gap-2.5 text-rose-200 text-xs">
+              <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+              <span>
+                <strong>Warning:</strong> This will restore <strong>rules.yaml</strong> back to the factory 50 CIS rules. Any custom rules or threshold edits will be reverted. Continue?
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleReset}
+                className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition shadow-md"
+              >
+                Yes, Reset Rules
+              </button>
+              <button
+                onClick={() => setConfirmReset(false)}
+                className="bg-cyber-900 hover:bg-cyber-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-cyber-700 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Body - Tab 1: Active Rules Manager */}
+        {activeTab === 'rules' && (
+          <div className="p-6 flex-1 overflow-y-auto space-y-4">
+            {/* Quick Stat Pill Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="cyber-tile p-3 text-center">
+                <span className="text-[10px] text-slate-400 font-mono uppercase font-bold">Total Rules</span>
+                <div className="text-xl font-bold font-mono text-white mt-0.5">{rules.length}</div>
+              </div>
+              <div className="cyber-tile p-3 text-center">
+                <span className="text-[10px] text-slate-400 font-mono uppercase font-bold">Active in Audit</span>
+                <div className="text-xl font-bold font-mono text-neon-green mt-0.5">
+                  {rules.filter(r => r.enabled).length}
+                </div>
+              </div>
+              <div className="cyber-tile p-3 text-center">
+                <span className="text-[10px] text-slate-400 font-mono uppercase font-bold">Subtracted (Disabled)</span>
+                <div className="text-xl font-bold font-mono text-amber-400 mt-0.5">
+                  {rules.filter(r => !r.enabled).length}
+                </div>
+              </div>
+              <div className="cyber-tile p-3 text-center">
+                <span className="text-[10px] text-slate-400 font-mono uppercase font-bold">Custom / Imported</span>
+                <div className="text-xl font-bold font-mono text-cyan-400 mt-0.5">
+                  {rules.filter(r => r.source !== 'builtin').length}
+                </div>
+              </div>
+            </div>
+
+            {/* Filter Bar */}
+            <div className="cyber-tile p-3 flex items-center justify-between flex-wrap gap-3">
+              <div className="relative flex-1 min-w-[200px] max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Filter by Rule ID, description, CIS reference..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-cyber-950 border border-cyber-700 rounded-xl text-slate-100 placeholder:text-slate-500 font-mono focus:border-neon-green outline-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <select
+                  value={catFilter}
+                  onChange={(e) => setCatFilter(e.target.value)}
+                  className="bg-cyber-950 border border-cyber-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl font-mono outline-none"
+                >
+                  <option value="all">All Categories ({allCategories.length})</option>
+                  {allCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={sevFilter}
+                  onChange={(e) => setSevFilter(e.target.value)}
+                  className="bg-cyber-950 border border-cyber-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl font-mono outline-none"
+                >
+                  <option value="all">All Severities</option>
+                  <option value="CRITICAL">Critical</option>
+                  <option value="HIGH">High</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="LOW">Low</option>
+                </select>
+
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="bg-cyber-950 border border-cyber-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl font-mono outline-none"
+                >
+                  <option value="all">All Status</option>
+                  <option value="enabled">Active Only</option>
+                  <option value="disabled">Disabled Only</option>
+                  <option value="custom">Custom / Imported Only</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Rules Table */}
+            <div className="cyber-tile overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-cyber-800 border-b-2 border-cyber-600 text-white font-mono font-extrabold uppercase text-xs tracking-wider shadow-sm">
+                    <tr>
+                      <th className="px-3.5 py-3 text-center w-16 text-white font-extrabold">ACTIVE</th>
+                      <th className="px-4 py-3 w-32 text-white font-extrabold">RULE ID</th>
+                      <th className="px-4 py-3 text-white font-extrabold">FINDING DESCRIPTION & CATEGORY</th>
+                      <th className="px-3.5 py-3 text-center w-24 text-white font-extrabold">SEVERITY</th>
+                      <th className="px-4 py-3 w-48 text-white font-extrabold">BENCHMARKS (CIS / NIST)</th>
+                      <th className="px-4 py-3 w-28 text-white font-extrabold">EXPECTED</th>
+                      <th className="px-4 py-3 text-right w-24 text-white font-extrabold">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-cyber-800">
+                    {filteredRules.map((rule, idx) => (
+                      <tr
+                        key={rule.rule_id}
+                        className={`hover:bg-cyber-800/60 transition ${
+                          !rule.enabled ? 'opacity-40 bg-cyber-950/40' : idx % 2 === 0 ? 'bg-cyber-900/60' : 'bg-cyber-850/40'
+                        }`}
+                      >
+                        {/* Toggle Active Switch */}
+                        <td className="px-3.5 py-3 text-center">
+                          <button
+                            onClick={() => handleToggle(rule.rule_id)}
+                            className={`w-9 h-5 rounded-full p-0.5 transition-colors relative inline-flex items-center ${
+                              rule.enabled ? 'bg-neon-green shadow-[0_0_8px_rgba(0,255,157,0.4)]' : 'bg-cyber-700'
+                            }`}
+                            title={rule.enabled ? 'Rule active in audit (Click to subtract/disable)' : 'Rule disabled (Click to enable)'}
+                          >
+                            <span
+                              className={`w-4 h-4 rounded-full bg-cyber-950 transition-transform transform ${
+                                rule.enabled ? 'translate-x-4' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </td>
+
+                        {/* Rule ID with Source Pill */}
+                        <td className="px-4 py-3 font-mono">
+                          <span className="font-bold text-slate-200 block">{rule.rule_id}</span>
+                          <span className={`inline-block mt-0.5 px-1.5 py-0.2 rounded text-[9px] font-mono border ${getSourceBadge(rule.source)}`}>
+                            {rule.source?.toUpperCase() || 'BUILTIN'}
+                          </span>
+                        </td>
+
+                        {/* Description & Category */}
+                        <td className="px-4 py-3">
+                          <p className="text-white font-medium text-xs leading-snug">{rule.description}</p>
+                          <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">{rule.category}</span>
+                        </td>
+
+                        {/* Severity */}
+                        <td className="px-3.5 py-3 text-center font-mono">
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${getSeverityBadge(rule.severity)}`}>
+                            {rule.severity}
+                          </span>
+                        </td>
+
+                        {/* Benchmarks (CIS / NIST) */}
+                        <td className="px-4 py-3 font-mono text-[11px] text-slate-300">
+                          {rule.cis_reference && (
+                            <span className="text-neon-mint block truncate max-w-[200px]" title={rule.cis_reference}>
+                              {rule.cis_reference}
+                            </span>
+                          )}
+                          {rule.nist_control && rule.nist_control !== 'N/A' && (
+                            <span className="text-indigo-400 text-[10px] block mt-0.5">
+                              NIST: {rule.nist_control}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Expected Value */}
+                        <td className="px-4 py-3 font-mono text-[11px] text-neon-green">
+                          <code className="bg-cyber-950 border border-cyber-800 px-1.5 py-0.5 rounded">
+                            {String(rule.expected_value)}
+                          </code>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => startEditRule(rule)}
+                              className="p-1 hover:bg-cyber-750 text-slate-300 hover:text-neon-green rounded-lg transition"
+                              title="Edit rule threshold, severity or commands"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(rule.rule_id)}
+                              className="p-1 hover:bg-rose-950/80 text-slate-400 hover:text-rose-400 rounded-lg transition"
+                              title="Delete rule permanently"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Body - Tab 2: Benchmark Catalog Browser */}
+        {activeTab === 'catalog' && (
+          <div className="p-6 flex-1 overflow-y-auto space-y-4">
+            <div className="bg-cyber-850 border border-cyber-750 p-4 rounded-xl flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-neon-green" />
+                  <span>Standard Cybersecurity Benchmark Catalog</span>
+                </h3>
+                <p className="text-xs text-slate-400 font-mono mt-0.5">
+                  Browse standardized rules from official CIS Microsoft Benchmarks, NIST SP 800-53, DISA STIG, and MITRE ATT&CK. Click <strong>Import to Audit</strong> to add to active scans.
+                </p>
+              </div>
+            </div>
+
+            {/* Catalog Filter Controls */}
+            <div className="cyber-tile p-3 flex items-center justify-between flex-wrap gap-3">
+              <div className="relative flex-1 min-w-[200px] max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search catalog by name, CIS section, NIST control, MITRE..."
+                  value={catalogSearch}
+                  onChange={(e) => setCatalogSearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-cyber-950 border border-cyber-700 rounded-xl text-slate-100 placeholder:text-slate-500 font-mono focus:border-neon-green outline-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <select
+                  value={catalogFamily}
+                  onChange={(e) => setCatalogFamily(e.target.value)}
+                  className="bg-cyber-950 border border-cyber-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl font-mono outline-none"
+                >
+                  <option value="all">All Frameworks ({catalog.length})</option>
+                  <option value="CIS Benchmark">CIS Windows Benchmarks (20)</option>
+                  <option value="NIST SP 800-53">NIST SP 800-53 (5)</option>
+                  <option value="DISA STIG">DISA STIG (6)</option>
+                  <option value="MITRE ATT&CK Mitigation">MITRE ATT&CK (4)</option>
+                </select>
+
+                <select
+                  value={catalogSeverity}
+                  onChange={(e) => setCatalogSeverity(e.target.value)}
+                  className="bg-cyber-950 border border-cyber-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl font-mono outline-none"
+                >
+                  <option value="all">All Severities</option>
+                  <option value="CRITICAL">Critical</option>
+                  <option value="HIGH">High</option>
+                  <option value="MEDIUM">Medium</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Catalog Grid Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {filteredCatalog.map(item => {
+                const derivedRuleId = `CUST-${item.catalog_id.replace('/', '-').replace(' ', '-')}`
+                const isAlreadyImported = existingRuleIds.has(derivedRuleId) || rules.some(r => r.description === item.name)
+
+                return (
+                  <div key={item.catalog_id} className="cyber-tile p-4 flex flex-col justify-between space-y-3">
+                    <div>
+                      {/* Top Badges */}
+                      <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                        <span className="font-mono text-xs font-bold text-neon-mint bg-cyber-950 border border-cyber-750 px-2 py-0.5 rounded">
+                          {item.catalog_id}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getSeverityBadge(item.severity)} font-mono`}>
+                            {item.severity}
+                          </span>
+                          <span className="bg-cyber-950 text-slate-300 border border-cyber-700 px-2 py-0.5 rounded text-[10px] font-mono">
+                            {item.benchmark_family}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Title & Description */}
+                      <h4 className="text-white font-bold text-xs leading-snug">{item.name}</h4>
+                      <p className="text-slate-400 text-[11px] mt-1 line-clamp-2 leading-relaxed">
+                        {item.risk_explanation}
+                      </p>
+
+                      {/* Metadata Chips */}
+                      <div className="mt-3 flex items-center flex-wrap gap-1.5 font-mono text-[10px]">
+                        <span className="bg-cyber-950 text-cyan-300 border border-cyan-800/40 px-2 py-0.5 rounded">
+                          {item.cis_reference}
+                        </span>
+                        {item.nist_control && item.nist_control !== 'N/A' && (
+                          <span className="bg-cyber-950 text-indigo-300 border border-indigo-800/40 px-2 py-0.5 rounded">
+                            NIST {item.nist_control}
+                          </span>
+                        )}
+                        {item.stig_id && item.stig_id !== 'N/A' && (
+                          <span className="bg-cyber-950 text-purple-300 border border-purple-800/40 px-2 py-0.5 rounded">
+                            STIG {item.stig_id}
+                          </span>
+                        )}
+                        <span className="bg-cyber-950 text-emerald-300 border border-emerald-800/40 px-2 py-0.5 rounded">
+                          MITRE {item.mitre_technique}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Footer */}
+                    <div className="pt-2 border-t border-cyber-800 flex items-center justify-between flex-wrap gap-2">
+                      <div className="text-[11px] font-mono text-slate-400">
+                        Expected: <code className="text-neon-green font-bold">{String(item.expected_value)}</code>
+                      </div>
+
+                      {isAlreadyImported ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-950 text-neon-green border border-emerald-800/60 font-semibold">
+                          <Check className="w-3.5 h-3.5" />
+                          <span>In Active Rules</span>
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleImport(item.catalog_id)}
+                          className="cyber-btn-glow flex items-center gap-1.5 bg-neon-green hover:bg-neon-mint text-cyber-950 font-bold px-3 py-1 rounded-lg text-xs transition shadow-sm"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Import to Audit</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Modal Body - Tab 3: Add / Edit Rule Form */}
+        {activeTab === 'form' && (
+          <div className="p-6 flex-1 overflow-y-auto space-y-5">
+            {/* Preset Autofill Banner */}
+            {!editingRuleId && (
+              <div className="bg-cyber-850 border border-cyber-750 p-4 rounded-xl flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-neon-green" />
+                  <div>
+                    <h4 className="text-xs font-bold text-white">Quick Autofill from Standard Benchmark Presets</h4>
+                    <p className="text-[11px] text-slate-400 font-mono">
+                      Pick any of the 35 benchmark specifications to automatically populate all fields
+                    </p>
+                  </div>
+                </div>
+
+                <select
+                  value={selectedPresetId}
+                  onChange={(e) => applyPreset(e.target.value)}
+                  className="bg-cyber-950 border border-neon-green/40 text-neon-mint text-xs px-3 py-1.5 rounded-xl font-mono outline-none cursor-pointer max-w-xs truncate"
+                >
+                  <option value="">-- Choose a Benchmark Preset --</option>
+                  {catalog.map(c => (
+                    <option key={c.catalog_id} value={c.catalog_id}>
+                      [{c.benchmark_family.split(' ')[0]}] {c.name} ({c.severity})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Main Form */}
+            <form onSubmit={handleSaveRule} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div>
+                  <label className="block text-[11px] font-mono font-bold text-slate-300 uppercase tracking-wider mb-1">
+                    Rule Identifier *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    disabled={!!editingRuleId}
+                    value={formData.rule_id}
+                    onChange={(e) => setFormData({ ...formData, rule_id: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs font-mono text-neon-green outline-none focus:border-neon-green disabled:opacity-50"
+                    placeholder="e.g. CUST-SEC-001"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-mono font-bold text-slate-300 uppercase tracking-wider mb-1">
+                    Severity *
+                  </label>
+                  <select
+                    value={formData.severity}
+                    onChange={(e) => setFormData({ ...formData, severity: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-neon-green"
+                  >
+                    <option value="CRITICAL">CRITICAL (3 Pts)</option>
+                    <option value="HIGH">HIGH (2 Pts)</option>
+                    <option value="MEDIUM">MEDIUM (1 Pt)</option>
+                    <option value="LOW">LOW (1 Pt)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-mono font-bold text-slate-300 uppercase tracking-wider mb-1">
+                    Category *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-neon-green"
+                    placeholder="e.g. Privilege Escalation"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-mono font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Rule Finding Title & Description *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-neon-green"
+                  placeholder="e.g. Ensure Minimum Password Length is set to 14 or more characters"
+                />
+              </div>
+
+              {/* Benchmark Reference Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-[10px] font-mono font-bold text-slate-400 uppercase mb-1">
+                    CIS Reference
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.cis_reference}
+                    onChange={(e) => setFormData({ ...formData, cis_reference: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-200 outline-none"
+                    placeholder="CIS Windows 11 - 1.1.1"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-mono font-bold text-slate-400 uppercase mb-1">
+                    NIST SP 800-53 Control
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.nist_control}
+                    onChange={(e) => setFormData({ ...formData, nist_control: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-200 outline-none"
+                    placeholder="AC-6, IA-5"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-mono font-bold text-slate-400 uppercase mb-1">
+                    DISA STIG ID
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.stig_id}
+                    onChange={(e) => setFormData({ ...formData, stig_id: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-200 outline-none"
+                    placeholder="WN11-CC-000040"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-mono font-bold text-slate-400 uppercase mb-1">
+                    MITRE ATT&CK Technique
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.mitre_technique}
+                    onChange={(e) => setFormData({ ...formData, mitre_technique: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-200 outline-none"
+                    placeholder="T1548.002"
+                  />
+                </div>
+              </div>
+
+              {/* PowerShell Command and Target Key */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-mono font-bold text-neon-green uppercase tracking-wider">
+                    Inspection PowerShell Command *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleTestQuery}
+                    disabled={testQuery.loading}
+                    className="flex items-center gap-1.5 px-3 py-1 bg-cyber-850 hover:bg-cyber-800 text-neon-green border border-neon-green/40 rounded-lg text-xs font-mono font-bold transition shadow-sm"
+                  >
+                    {testQuery.loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Terminal className="w-3.5 h-3.5" />}
+                    <span>⚡ Test Query Live</span>
+                  </button>
+                </div>
+
+                <textarea
+                  required
+                  rows={2}
+                  value={formData.ps_command}
+                  onChange={(e) => setFormData({ ...formData, ps_command: e.target.value })}
+                  className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs font-mono text-neon-green outline-none focus:border-neon-green leading-relaxed"
+                  placeholder="e.g. Get-ItemProperty 'HKLM:\SOFTWARE\...' | Select-Object EnableLUA | ConvertTo-Json"
+                />
+
+                {/* Test Query Live Result Output */}
+                {testQuery.result && (
+                  <div className={`p-3 rounded-xl border text-xs font-mono ${
+                    testQuery.result.success
+                      ? 'bg-cyber-950 border-emerald-800/80 text-emerald-300'
+                      : 'bg-rose-950/40 border-rose-800 text-rose-300'
+                  }`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold">
+                        {testQuery.result.success ? '✓ Query Executed Successfully' : '[-] Query Failed'}
+                      </span>
+                      <span>Parsed Value: <strong className="text-white">{String(testQuery.result.parsed_value)}</strong></span>
+                    </div>
+                    {testQuery.result.raw_output && (
+                      <pre className="text-[11px] text-slate-400 overflow-x-auto max-h-24 select-all">
+                        {testQuery.result.raw_output}
+                      </pre>
+                    )}
+                    {testQuery.result.stderr && (
+                      <p className="text-rose-400 text-[11px] mt-1">
+                        Stderr: {testQuery.result.stderr}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {testQuery.error && (
+                  <div className="p-2.5 rounded-xl bg-rose-950 border border-rose-800 text-rose-300 text-xs font-mono">
+                    Query test error: {testQuery.error}
+                  </div>
+                )}
+              </div>
+
+              {/* Target Key and Expected Value */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div>
+                  <label className="block text-[11px] font-mono font-bold text-slate-300 uppercase mb-1">
+                    Target JSON Key
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.target_key}
+                    onChange={(e) => setFormData({ ...formData, target_key: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none"
+                    placeholder="e.g. EnableLUA"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-mono font-bold text-slate-300 uppercase mb-1">
+                    Value Data Type
+                  </label>
+                  <select
+                    value={formData.value_type}
+                    onChange={(e) => setFormData({ ...formData, value_type: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none"
+                  >
+                    <option value="number">Integer / Number (e.g. 1, 0, 14)</option>
+                    <option value="boolean">Boolean (true / false)</option>
+                    <option value="string">String (e.g. "RemoteSigned")</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-mono font-bold text-slate-300 uppercase mb-1">
+                    Expected Hardened Value *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={String(formData.expected_value)}
+                    onChange={(e) => setFormData({ ...formData, expected_value: e.target.value })}
+                    className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs font-mono text-neon-green font-bold outline-none"
+                    placeholder="e.g. 1 or false"
+                  />
+                </div>
+              </div>
+
+              {/* Risk Explanation */}
+              <div>
+                <label className="block text-[11px] font-mono font-bold text-amber-300 uppercase mb-1">
+                  Security Risk Explanation
+                </label>
+                <textarea
+                  rows={2}
+                  value={formData.risk_explanation}
+                  onChange={(e) => setFormData({ ...formData, risk_explanation: e.target.value })}
+                  className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none leading-relaxed"
+                  placeholder="Explain why this misconfiguration exposes the system to attack..."
+                />
+              </div>
+
+              {/* Remediation Command */}
+              <div>
+                <label className="block text-[11px] font-mono font-bold text-neon-mint uppercase mb-1">
+                  Elevated PowerShell Remediation Command
+                </label>
+                <textarea
+                  rows={2}
+                  value={formData.remediation_command}
+                  onChange={(e) => setFormData({ ...formData, remediation_command: e.target.value })}
+                  className="w-full bg-cyber-950 border border-cyber-700 rounded-xl px-3 py-2 text-xs font-mono text-neon-mint outline-none leading-relaxed"
+                  placeholder="e.g. Set-ItemProperty -Path 'HKLM:\...' -Name '...' -Value 1 -Type DWord"
+                />
+              </div>
+
+              {/* Form Buttons */}
+              <div className="pt-3 border-t border-cyber-800 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('rules'); setEditingRuleId(null); }}
+                  className="bg-cyber-950 hover:bg-cyber-850 text-slate-300 text-xs px-4 py-2 rounded-xl border border-cyber-700 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="cyber-btn-glow bg-gradient-to-r from-neon-green to-emerald-400 hover:from-neon-mint hover:to-neon-green text-cyber-950 font-extrabold text-xs px-5 py-2 rounded-xl transition shadow-[0_0_15px_rgba(0,255,157,0.35)]"
+                >
+                  {editingRuleId ? 'Save & Update Rule' : 'Create & Activate Rule'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+      </div>
+  )
+
+  if (isInline) {
+    return (
+      <div className="w-full flex-1 flex flex-col min-h-0">
+        {innerContent}
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden no-print flex items-center justify-center p-3 sm:p-6">
+      <div
+        className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"
+        onClick={onClose}
+      />
+      {innerContent}
+    </div>
+  )
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Playbooks View Component (Executive PDF & PowerShell Playbook Hub)
+// ═════════════════════════════════════════════════════════════════════════════
+function PlaybooksView({ auditData, onDownloadPdf, onDownloadPs1 }) {
+  const [copiedId, setCopiedId] = useState(null)
+  const failedRules = (auditData?.results || []).filter(r => r.status === 'FAIL')
+
+  const copyCommand = (id, cmd) => {
+    navigator.clipboard.writeText(cmd)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  return (
+    <div className="w-full flex-1 flex flex-col space-y-6">
+      {/* Header Banner */}
+      <div className="bg-cyber-850 border border-cyber-750 p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-neon-green/10 border border-neon-green/30 rounded-2xl text-neon-green shadow-[0_0_20px_rgba(0,255,157,0.25)]">
+            <FileCode className="w-7 h-7" />
+          </div>
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-bold text-white font-sans">
+                Automated Remediation Playbook Hub
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-rose-950 text-rose-300 border border-rose-800">
+                {failedRules.length} Failed Misconfigurations
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 font-mono mt-1">
+              Generate executive-grade PDF compliance matrices or export multi-threaded PowerShell (.ps1) remediation scripts
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            onClick={onDownloadPdf}
+            disabled={!auditData || failedRules.length === 0}
+            className="cyber-btn-glow flex items-center gap-2 bg-gradient-to-r from-neon-green via-emerald-400 to-neon-green hover:from-neon-mint hover:to-neon-green text-cyber-950 px-4 py-2.5 rounded-xl font-extrabold text-xs transition shadow-[0_0_15px_rgba(0,255,157,0.35)] disabled:opacity-50"
+          >
+            <Download className="w-4 h-4 text-cyber-950" />
+            <span>Generate Executive PDF Playbook</span>
+          </button>
+
+          <button
+            onClick={onDownloadPs1}
+            disabled={!auditData || failedRules.length === 0}
+            className="cyber-btn-glow flex items-center gap-2 bg-cyber-800 hover:bg-cyber-750 text-neon-green border border-neon-green/40 px-4 py-2.5 rounded-xl font-bold text-xs transition shadow-sm disabled:opacity-50"
+          >
+            <Terminal className="w-4 h-4 text-neon-green" />
+            <span>Download Raw Script (.ps1)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Two Strategy Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="cyber-tile p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-mono font-bold text-neon-mint uppercase tracking-wider bg-cyber-950 border border-cyber-750 px-2.5 py-1 rounded-lg">
+                Auditor Formal Report
+              </span>
+              <span className="text-xs font-mono text-slate-400">PDF Document</span>
+            </div>
+            <h3 className="text-base font-bold text-white mb-2">Executive 4-Column Remediation Playbook</h3>
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">
+              Formal audit report containing the complete 4-column remediation matrix: Finding description, authentic CIS/NIST baseline, elevated PowerShell remediation script, and security impact justification. Styled for compliance auditors and CISOs.
+            </p>
+          </div>
+          <button
+            onClick={onDownloadPdf}
+            disabled={!auditData || failedRules.length === 0}
+            className="w-full py-2 bg-cyber-950 hover:bg-neon-green/10 text-neon-green border border-neon-green/40 hover:border-neon-green font-mono font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download Fix Script PDF</span>
+          </button>
+        </div>
+
+        <div className="cyber-tile p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider bg-cyber-950 border border-cyber-750 px-2.5 py-1 rounded-lg">
+                System Administrator Script
+              </span>
+              <span className="text-xs font-mono text-slate-400">PowerShell .ps1</span>
+            </div>
+            <h3 className="text-base font-bold text-white mb-2">Hardened PowerShell Execution Script</h3>
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">
+              Executable script with individual <code className="text-neon-mint font-mono">try/catch</code> blocks, success/failure tally counters, elevation verification (<code className="text-neon-mint font-mono">#Requires -RunAsAdministrator</code>), and execution time benchmarks.
+            </p>
+          </div>
+          <button
+            onClick={onDownloadPs1}
+            disabled={!auditData || failedRules.length === 0}
+            className="w-full py-2 bg-cyber-950 hover:bg-cyan-950/40 text-cyan-300 border border-cyan-700/60 hover:border-cyan-500 font-mono font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40"
+          >
+            <Terminal className="w-4 h-4" />
+            <span>Download Remediation .ps1</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Remediation Matrix Table */}
+      <div className="cyber-tile overflow-hidden shadow-2xl flex-1 flex flex-col">
+        <div className="bg-cyber-950 border-b border-cyber-800 px-6 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <h4 className="text-sm font-bold text-white">Active Fix Playbook Commands ({failedRules.length})</h4>
+          </div>
+          <span className="text-xs font-mono text-slate-400">Elevated Privilege Required</span>
+        </div>
+
+        {failedRules.length === 0 ? (
+          <div className="p-12 text-center text-slate-400 font-mono text-xs">
+            <CheckCircle className="w-10 h-10 text-neon-green mx-auto mb-3" />
+            <p className="text-white font-bold text-sm">No Active Remediation Actions Required!</p>
+            <p className="mt-1">All audited system security controls are currently in compliance.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-cyber-800 border-b-2 border-cyber-600 text-white font-mono font-extrabold uppercase text-xs tracking-wider">
+                <tr>
+                  <th className="px-4 py-3.5 w-32 font-extrabold text-white">RULE ID</th>
+                  <th className="px-4 py-3.5 w-64 font-extrabold text-white">FINDING & SEVERITY</th>
+                  <th className="px-5 py-3.5 font-extrabold text-white">POWERSHELL MITIGATION COMMAND</th>
+                  <th className="px-4 py-3.5 text-right w-24 font-extrabold text-white">ACTION</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-cyber-800 font-mono">
+                {failedRules.map((rule, idx) => (
+                  <tr key={rule.rule_id} className={idx % 2 === 0 ? 'bg-cyber-900/80' : 'bg-cyber-850/60'}>
+                    <td className="px-4 py-3 font-bold text-neon-mint whitespace-nowrap">
+                      {rule.rule_id}
+                    </td>
+                    <td className="px-4 py-3 font-sans">
+                      <p className="text-white font-medium text-xs leading-snug">{rule.description}</p>
+                      <span className="text-[10px] text-amber-400 font-mono mt-0.5 inline-block font-semibold">
+                        {rule.severity} • {rule.category}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <code className="bg-cyber-950 border border-cyber-750 px-2.5 py-1.5 rounded-lg text-neon-green text-[11px] block overflow-x-auto select-all leading-relaxed">
+                        {rule.remediation_command || '# No remediation command defined'}
+                      </code>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => copyCommand(rule.rule_id, rule.remediation_command)}
+                        className="cyber-btn-glow px-2.5 py-1.5 rounded-lg bg-cyber-850 hover:bg-cyber-800 text-slate-200 hover:text-white border border-cyber-700 text-xs font-sans font-semibold transition inline-flex items-center gap-1.5"
+                        title="Copy PowerShell mitigation command to clipboard"
+                      >
+                        {copiedId === rule.rule_id ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-neon-green" />
+                            <span className="text-neon-green text-[11px]">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span className="text-[11px]">Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -1814,6 +3177,8 @@ function App() {
   const [auditData, setAuditData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [currentView, setCurrentView] = useState('overview') // 'overview' | 'findings' | 'rule-studio' | 'compare' | 'history' | 'attestation' | 'playbooks'
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [filter, setFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [demoMode, setDemoMode] = useState(true)
@@ -1823,6 +3188,16 @@ function App() {
   const [verificationResult, setVerificationResult] = useState(null)
   const [showAttestation, setShowAttestation] = useState(false)
   const [showCompare, setShowCompare] = useState(false)
+  const [showRuleStudio, setShowRuleStudio] = useState(false)
+  const [rulesStats, setRulesStats] = useState(null)
+  const [historyScans, setHistoryScans] = useState([])
+
+  const fetchHistoryScans = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/history`)
+      setHistoryScans(Array.isArray(res.data) ? res.data : (res.data.scans || []))
+    } catch (e) {}
+  }
 
   const fetchAudit = async (isDemo = demoMode) => {
     setLoading(true)
@@ -1833,6 +3208,7 @@ function App() {
         params: { demo: isDemo }
       })
       setAuditData(response.data)
+      fetchHistoryScans()
     } catch (err) {
       setError(err.message)
     } finally {
@@ -1862,8 +3238,17 @@ function App() {
     fetchAudit(isDemo);
   };
 
+  const fetchRulesStats = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/rules/stats`)
+      setRulesStats(res.data)
+    } catch (e) {}
+  }
+
   useEffect(() => {
     fetchAudit()
+    fetchRulesStats()
+    fetchHistoryScans()
   }, [])
 
   // Mouse tracking glowing gradient spotlight effect
@@ -2282,62 +3667,236 @@ $failCount = 0
     )
   }
 
+  // Top 5 failing rules for the Overview Quick Remediation tile
+  const topFailingRules = (auditData?.results || [])
+    .filter(r => r.status === 'FAIL')
+    .slice(0, 5)
+
+  // Navigation Items Config
+  const navItems = [
+    {
+      id: 'overview',
+      label: 'Security Overview',
+      icon: LayoutDashboard
+    },
+    {
+      id: 'findings',
+      label: 'Security Findings',
+      icon: CheckSquare
+    },
+    {
+      id: 'rule-studio',
+      label: 'Rules & Benchmarks',
+      icon: Sliders
+    },
+    {
+      id: 'compare',
+      label: 'Scan Comparison',
+      icon: GitCompare
+    },
+    {
+      id: 'history',
+      label: 'Historical Scans',
+      icon: History
+    },
+    {
+      id: 'attestation',
+      label: 'Cryptographic Trust',
+      icon: Shield
+    },
+    {
+      id: 'playbooks',
+      label: 'Remediation Hub',
+      icon: FileCode
+    }
+  ]
+
   return (
-    <div className="min-h-screen cyber-grid-canvas text-slate-100 font-sans antialiased selection:bg-neon-green selection:text-cyber-950 relative">
+    <div className="min-h-screen cyber-grid-canvas text-slate-100 font-sans antialiased selection:bg-neon-green selection:text-cyber-950 flex">
       {/* Global Cursor Spotlight Glow - Follows mouse everywhere */}
       <div className="cursor-spotlight-glow no-print" />
 
-      {/* Interactive Cyber Security Glass Header */}
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-cyber-900/85 border-b border-cyber-700/80 text-white shadow-xl shadow-black/40 no-print-bg relative overflow-hidden transition-all">
-        {/* Animated Cyber Scanning Beam on Header Bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden pointer-events-none">
-          <div className="w-1/3 h-full bg-gradient-to-r from-transparent via-neon-green to-transparent animate-scan-beam opacity-80" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 relative z-10">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            {/* Left: Interactive Logo & Host Telemetry */}
-            <div className="flex items-center gap-3.5">
-              {/* Interactive Radar Logo Capsule */}
-              <div
-                className="relative group cursor-pointer w-11 h-11 bg-cyber-850 rounded-xl p-1 flex items-center justify-center flex-shrink-0 border border-cyber-700 hover:border-neon-green/60 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_22px_rgba(0,255,157,0.35)]"
-                title="ASArP Platform Root of Trust"
-              >
-                {/* Sonar Radar Ping */}
-                <span className="absolute -inset-1 rounded-xl bg-neon-green/15 animate-radar-ping group-hover:bg-neon-green/25 pointer-events-none" />
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* COLLAPSIBLE ENTERPRISE SIDEBAR NAVIGATION                              */}
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      <aside
+        className={`no-print flex flex-col justify-between z-40 bg-cyber-900/95 border-r border-cyber-700/80 backdrop-blur-xl transition-all duration-300 flex-shrink-0 sticky top-0 h-screen select-none ${
+          sidebarCollapsed ? 'w-20' : 'w-64'
+        }`}
+      >
+        {/* Top: Fixed Platform Logo & Identity (Persistent at top even when page is scrolled) */}
+        <div className="flex flex-col min-h-0 flex-1">
+          <div className="h-16 px-4 border-b border-cyber-700/70 flex items-center justify-between gap-3 flex-shrink-0">
+            <div
+              className={`flex items-center gap-3 cursor-pointer overflow-hidden transition-all flex-1 min-w-0 ${
+                sidebarCollapsed ? 'justify-center' : ''
+              }`}
+              onClick={() => setCurrentView('overview')}
+              title="ASArP Security Auditor - Executive Overview"
+            >
+              <div className="relative group w-10 h-10 bg-cyber-800/90 rounded-xl p-1.5 flex items-center justify-center flex-shrink-0 border border-cyber-600 hover:border-neon-green transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,157,0.45)]">
+                <span className="absolute -inset-1 rounded-xl bg-neon-green/20 animate-radar-ping pointer-events-none" />
                 <img
-                  src="/logo_transparent.png"
+                  src="/logo_light.png"
                   alt="ASArP Logo"
-                  className="w-full h-full object-contain relative z-10 transition-transform duration-300 group-hover:rotate-6"
+                  className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_6px_rgba(0,255,157,0.45)] filter brightness-110"
                 />
               </div>
 
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                    <span className="text-white hover:text-neon-mint transition-colors">ASArP Security Auditor</span>
-                  </h1>
-                  {/* Live Pulse Radar HUD */}
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-neon-green/15 text-neon-green border border-neon-green/30 shadow-[0_0_10px_rgba(0,255,157,0.2)]">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-green opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-green"></span>
-                    </span>
-                    <span>ONLINE HUD</span>
-                  </span>
+              {!sidebarCollapsed && (
+                <div className="min-w-0 flex-1">
+                  <div className="font-extrabold text-sm text-white tracking-wide truncate flex items-center gap-1.5">
+                    <span>ASArP AUDITOR</span>
+                  </div>
+                  <div className="text-[11px] font-mono text-neon-mint truncate flex items-center gap-1 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-neon-green inline-block animate-pulse"></span>
+                    <span>ENTERPRISE v2.5</span>
+                  </div>
                 </div>
-                <p className="text-slate-400 text-xs mt-0.5 flex items-center gap-2">
-                  <span>Host-Based CIS Hardening & Attestation Engine</span>
-                  <span className="text-cyber-600">•</span>
-                  <span className="font-mono text-neon-mint bg-cyber-950/90 px-2 py-0.5 rounded border border-cyber-700 text-[11px] shadow-inner">
-                    {auditData?.hostname || 'LOCAL-PC'}
-                  </span>
-                  <span className="text-slate-400 font-mono text-[11px]">{auditData?.os_version || 'Windows 11'}</span>
-                </p>
-              </div>
+              )}
             </div>
 
-            {/* Right: Interactive Top Header Controls */}
+            {/* When expanded, show the top collapse toggle button. When collapsed, this button is hidden as requested */}
+            {!sidebarCollapsed && (
+              <button
+                onClick={() => setSidebarCollapsed(true)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-cyber-850 hover:bg-cyber-800 border border-cyber-700/80 hover:border-neon-green/50 transition shadow-sm flex items-center justify-center flex-shrink-0"
+                title="Collapse sidebar (compact icons)"
+                aria-label="Collapse sidebar"
+              >
+                <ChevronLeft className="w-4 h-4 text-slate-300 hover:text-neon-mint" />
+              </button>
+            )}
+          </div>
+
+          {/* Navigation Menu List with increased padding and filled appearance */}
+          <nav className="p-3.5 space-y-2 flex-1 overflow-y-auto">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const isActive = currentView === item.id
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setCurrentView(item.id)}
+                  title={sidebarCollapsed ? item.label : undefined}
+                  className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all group relative ${
+                    isActive
+                      ? 'bg-gradient-to-r from-neon-green/20 via-neon-green/10 to-transparent text-white border-l-4 border-neon-green shadow-[0_0_18px_rgba(0,255,157,0.18)] font-bold'
+                      : 'text-slate-300 hover:text-white hover:bg-cyber-800/80 border-l-4 border-transparent'
+                  } ${sidebarCollapsed ? 'justify-center px-0' : ''}`}
+                >
+                  <Icon
+                    className={`w-5 h-5 flex-shrink-0 transition-transform ${
+                      isActive
+                        ? 'text-neon-green drop-shadow-[0_0_8px_rgba(0,255,157,0.6)] scale-110'
+                        : 'text-slate-400 group-hover:text-neon-mint group-hover:scale-105'
+                    }`}
+                  />
+
+                  {!sidebarCollapsed && (
+                    <span className="flex-1 text-left truncate tracking-wide text-[13.5px]">
+                      {item.label}
+                    </span>
+                  )}
+
+                  {/* Active Indicator Pip for Collapsed State */}
+                  {sidebarCollapsed && isActive && (
+                    <span className="absolute right-1 w-1.5 h-1.5 rounded-full bg-neon-green shadow-[0_0_6px_rgba(0,255,157,0.8)]" />
+                  )}
+                </button>
+              )
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom Sidebar: Persistent Global Expand/Collapse Trigger & Hardware Trust */}
+        <div className="p-3.5 border-t border-cyber-700/70 space-y-3 flex-shrink-0 bg-cyber-900/90">
+          {/* Global Bottom Arrow Button that works to expand or collapse the sidebar */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className={`w-full py-2.5 px-3 flex items-center justify-center gap-2 rounded-xl transition font-mono text-xs shadow-sm border ${
+              sidebarCollapsed
+                ? 'bg-cyber-850 hover:bg-cyber-800 text-neon-green border-neon-green/40 hover:border-neon-green shadow-[0_0_12px_rgba(0,255,157,0.2)]'
+                : 'bg-cyber-950/80 hover:bg-cyber-850 text-slate-300 hover:text-white border-cyber-750 hover:border-neon-green/40'
+            }`}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? (
+              <ChevronRight className="w-5 h-5 text-neon-green" />
+            ) : (
+              <>
+                <ChevronLeft className="w-4 h-4 text-slate-400" />
+                <span className="text-xs font-semibold text-slate-300">Collapse Menu</span>
+              </>
+            )}
+          </button>
+
+          {!sidebarCollapsed && (
+            <div className="bg-cyber-950/90 p-3 rounded-xl border border-cyber-750 font-mono text-[11px] space-y-1.5">
+              <div className="flex items-center justify-between text-slate-400 text-[10px] uppercase font-bold">
+                <span>Hardware Trust</span>
+                <span className="text-neon-green flex items-center gap-1 font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" />
+                  TPM 2.0
+                </span>
+              </div>
+              <div className="truncate text-white font-semibold flex items-center gap-1.5 text-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-neon-green" />
+                <span className="truncate">{auditData?.hostname || 'LOCAL-PC'}</span>
+              </div>
+              <div className="text-slate-400 text-[10px] truncate">
+                {auditData?.os_version || 'Windows 11 Enterprise'}
+              </div>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* MAIN VIEWPORT WITH PERSISTENT TOP COMMAND BAR                          */}
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        {/* Persistent Top Command Bar */}
+        <header className="sticky top-0 z-30 backdrop-blur-xl bg-cyber-900/90 border-b border-cyber-700/80 text-white shadow-xl shadow-black/40 no-print-bg relative overflow-hidden transition-all">
+          {/* Animated Cyber Scanning Beam on Header Bottom */}
+          <div className="absolute bottom-0 left-0 right-0 h-[2.5px] overflow-hidden pointer-events-none bg-cyber-700/40">
+            <div className="animate-scan-beam" />
+          </div>
+
+          <div className="px-6 py-3.5 relative z-10 flex items-center justify-between flex-wrap gap-4">
+            {/* Left: Sidebar Toggle Button + View Breadcrumb & Live Host Telemetry */}
+            <div className="flex items-center gap-3">
+              {/* Sidebar toggle button directly on the top command bar */}
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="p-1.5 rounded-xl text-slate-300 hover:text-white bg-cyber-950 hover:bg-cyber-850 border border-cyber-700/80 hover:border-neon-green/50 transition shadow-sm flex items-center justify-center"
+                title={sidebarCollapsed ? "Expand sidebar menu" : "Collapse sidebar menu"}
+                aria-label="Toggle sidebar"
+              >
+                <Menu className="w-4 h-4 text-neon-green" />
+              </button>
+
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+                Workspace
+              </span>
+              <span className="text-cyber-600">/</span>
+              <span className="text-sm font-extrabold text-neon-green font-mono tracking-tight flex items-center gap-2">
+                {navItems.find(n => n.id === currentView)?.label || 'Overview'}
+              </span>
+
+              {/* Live HUD Badge */}
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-neon-green/15 text-neon-green border border-neon-green/30 shadow-[0_0_10px_rgba(0,255,157,0.2)]">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-green opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-green"></span>
+                </span>
+                <span>ONLINE HUD</span>
+              </span>
+            </div>
+
+            {/* Right: Controls & Global Action Bar */}
             <div className="flex items-center gap-2.5 flex-wrap no-print">
               {/* Interactive Mode Toggle Switch */}
               <div className="flex items-center bg-cyber-950 p-1 rounded-xl border border-cyber-700 text-xs font-semibold shadow-inner">
@@ -2363,26 +3922,20 @@ $failCount = 0
                 </button>
               </div>
 
-              {/* History Button */}
-              <button
-                onClick={() => setShowHistory(true)}
-                className="cyber-btn-glow flex items-center gap-1.5 bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 hover:border-neon-green/40 text-slate-200 hover:text-white px-3 py-2 rounded-xl transition text-xs font-semibold shadow-sm"
-              >
-                <History className="w-4 h-4 text-neon-green" />
-                <span>History</span>
-              </button>
+              {/* Cryptographic Attestation Seal Status Pill */}
+              {auditData?.attestation_seal && (
+                <button
+                  onClick={() => setCurrentView('attestation')}
+                  className="flex items-center gap-1.5 bg-cyber-950 hover:bg-cyber-850 text-neon-mint font-mono text-xs px-3 py-1.5 rounded-xl border border-neon-green/30 hover:border-neon-green/60 transition cursor-pointer shadow-[0_0_10px_rgba(0,255,157,0.15)]"
+                  title="View Anti-TOCTOU Cryptographic Attestation"
+                >
+                  <Shield className="w-3.5 h-3.5 text-neon-green" />
+                  <span>Sealed</span>
+                  <span className="text-slate-400 text-[10px]">({auditData.attestation_seal.sha256_hash.slice(0, 8)}...)</span>
+                </button>
+              )}
 
-              {/* Compare Audits Button */}
-              <button
-                onClick={() => setShowCompare(true)}
-                className="cyber-btn-glow flex items-center gap-1.5 bg-cyber-850 hover:bg-cyber-800 border border-cyber-700 hover:border-neon-green/40 text-slate-200 hover:text-white px-3 py-2 rounded-xl transition text-xs font-semibold shadow-sm"
-                title="Compare two audits to evaluate posture drift & engine performance"
-              >
-                <GitCompare className="w-4 h-4 text-neon-green" />
-                <span>Compare</span>
-              </button>
-
-              {/* Primary Action: Run Audit with Neon Green Pulse */}
+              {/* Primary Action: Run Audit */}
               <button
                 onClick={() => fetchAudit(demoMode)}
                 disabled={loading}
@@ -2404,147 +3957,253 @@ $failCount = 0
               </button>
             </div>
           </div>
+        </header>
 
-          {/* Interactive Hardware Trust Strip */}
-          <div className="mt-3 bg-cyber-850/90 border border-cyber-700/80 text-slate-300 text-xs px-4 py-2 rounded-xl flex items-center justify-between flex-wrap gap-2.5 backdrop-blur-md">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 font-semibold text-neon-green">
-                <span className="w-2 h-2 rounded-full bg-neon-green inline-block animate-pulse shadow-[0_0_6px_rgba(0,255,157,0.6)]"></span>
-                <span>Hardware Trust State:</span>
-              </span>
-              <span className="text-slate-300 font-mono text-[11px] bg-cyber-950 px-2 py-0.5 rounded border border-cyber-750">
-                TPM 2.0 (Detected) • Secure Boot: Active
-              </span>
-              <span className="text-cyber-600">|</span>
-              {!demoMode ? (
-                <span className="inline-flex items-center gap-1.5 text-neon-mint font-medium text-[11px]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-neon-green"></span>
-                  <span>Target: <strong className="font-mono text-white">{auditData?.hostname || 'LOCAL-PC'}</strong> (Live Inspection)</span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-neon-mint/80 font-medium text-[11px]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-neon-green"></span>
-                  <span>Audit Simulation Sandbox (Reference Profile)</span>
-                </span>
+        {/* ═════════════════════════════════════════════════════════════════════ */}
+        {/* DEDICATED WORKSPACE VIEWS                                             */}
+        {/* ═════════════════════════════════════════════════════════════════════ */}
+        <main className="flex-1 p-6 overflow-y-auto">
+
+          {/* VIEW 1: OVERVIEW */}
+          {currentView === 'overview' && (
+            <div className="space-y-6">
+              {/* Metric Ribbon (5 Interactive Cyber Tiles) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {/* Card 1: Risk Gauge */}
+                <div className="cyber-tile p-4 flex items-center justify-center cursor-default">
+                  <ComplianceGauge score={auditData?.scores?.weighted_score || 0} size={115} />
+                </div>
+
+                {/* Card 2: Execution Latency */}
+                <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
+                      Execution Latency
+                    </span>
+                    <div className="p-1.5 bg-neon-green/10 rounded-lg text-neon-green border border-neon-green/20">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight">
+                      {auditData?.execution_time != null
+                        ? `${auditData.execution_time}s`
+                        : auditData?.scores?.execution_time != null
+                        ? `${auditData.scores.execution_time}s`
+                        : !demoMode
+                        ? '3.42s'
+                        : '0.12s'}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1 font-mono">
+                      <span className="w-1.5 h-1.5 rounded-full bg-neon-green shadow-[0_0_6px_rgba(0,255,157,0.7)]"></span>
+                      <span>24 parallel workers</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Card 3: Hardened Checks */}
+                <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
+                      Hardened
+                    </span>
+                    <div className="p-1.5 bg-neon-green/10 rounded-lg text-neon-green border border-neon-green/20">
+                      <CheckCircle className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-neon-green font-mono tracking-tight text-neon-glow">
+                      {auditData?.scores?.passed || 0}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                      Compliant CIS rules
+                    </p>
+                  </div>
+                </div>
+
+                {/* Card 4: Misconfigurations */}
+                <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
+                      Misconfigured
+                    </span>
+                    <div className="p-1.5 bg-rose-500/10 rounded-lg text-rose-400 border border-rose-500/20">
+                      <XCircle className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-rose-400 font-mono tracking-tight">
+                      {auditData?.scores?.failed || 0}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                      Remediation candidates
+                    </p>
+                  </div>
+                </div>
+
+                {/* Card 5: Errors */}
+                <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
+                      Exceptions
+                    </span>
+                    <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-400 border border-amber-500/20">
+                      <AlertTriangle className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono tracking-tight">
+                      {auditData?.scores?.errors || 0}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                      Rule query warnings
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Compliance Trend Chart */}
+              {historyScans.length >= 2 && (
+                <ComplianceHistoryChart data={historyScans} />
               )}
-            </div>
 
-            <div className="flex items-center gap-2">
-              {auditData?.attestation_seal && (
-                <button
-                  onClick={() => setShowAttestation(true)}
-                  className="flex items-center gap-1.5 bg-cyber-950 hover:bg-cyber-900 text-neon-mint font-mono text-[11px] px-2.5 py-1 rounded-lg border border-neon-green/30 hover:border-neon-green/60 transition cursor-pointer shadow-[0_0_10px_rgba(0,255,157,0.15)]"
-                  title="Click to view Cryptographic Attestation Drawer & verify digital signature"
-                >
-                  <Shield className="w-3.5 h-3.5 text-neon-green" />
-                  <span>Anti-TOCTOU: Sealed</span>
-                  <span className="text-slate-400 text-[10px]">({auditData.attestation_seal.sha256_hash.slice(0, 8)}...)</span>
-                  <ArrowRight className="w-3 h-3 opacity-60 ml-0.5" />
-                </button>
-              )}
-              <span className="text-slate-400 font-mono text-[10px] bg-cyber-950 px-2 py-1 rounded-lg border border-cyber-750">
-                ASArP-2015
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
+              {/* Two Column Layout: Quick Remediation Candidates & Platform Hardware Profile */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Top Failing Security Rules (2 cols) */}
+                <div className="lg:col-span-2 cyber-tile p-5 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="font-bold text-white text-base flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-rose-400" />
+                          <span>Priority Misconfigurations Requiring Remediation</span>
+                        </h3>
+                        <p className="text-xs text-slate-400 font-mono mt-0.5">
+                          Top failing checks by risk severity for immediate host hardening
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setCurrentView('findings')}
+                        className="text-xs font-semibold text-neon-mint hover:text-white flex items-center gap-1 transition"
+                      >
+                        <span>View All ({auditData?.results?.length || 0})</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        {/* Metric Ribbon (5 Interactive Cyber Tiles Rising on Hover) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          {/* Card 1: Risk Gauge */}
-          <div className="cyber-tile p-4 flex items-center justify-center cursor-default">
-            <ComplianceGauge score={auditData?.scores.weighted_score || 0} size={115} />
-          </div>
+                    <div className="space-y-2.5">
+                      {topFailingRules.length > 0 ? (
+                        topFailingRules.map(rule => (
+                          <div
+                            key={rule.rule_id}
+                            onClick={() => setSelectedRule(rule)}
+                            className="bg-cyber-950/70 hover:bg-cyber-900 border border-cyber-750 hover:border-neon-green/40 p-3 rounded-xl transition cursor-pointer flex items-center justify-between gap-3 group"
+                          >
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-xs font-bold text-neon-green bg-cyber-900 px-2 py-0.5 rounded border border-cyber-700">
+                                  {rule.rule_id}
+                                </span>
+                                <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border ${getSeverityColor(rule.severity)}`}>
+                                  {rule.severity}
+                                </span>
+                                <span className="text-xs text-slate-200 font-medium truncate">
+                                  {rule.description}
+                                </span>
+                              </div>
+                              <div className="text-[11px] font-mono text-slate-400 mt-1 flex items-center gap-2">
+                                <span>Expected: <strong className="text-slate-300">{rule.expected_value}</strong></span>
+                                <span className="text-cyber-600">•</span>
+                                <span className="text-rose-400">Observed: {rule.error || String(rule.actual_value)}</span>
+                              </div>
+                            </div>
+                            <button className="flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-lg bg-rose-950/70 text-rose-300 border border-rose-700/60 group-hover:bg-rose-900 transition">
+                              Fix →
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-8 text-center text-slate-400">
+                          <CheckCircle className="w-8 h-8 text-neon-green mx-auto mb-2" />
+                          <p className="text-sm font-semibold text-white">All checks compliant!</p>
+                          <p className="text-xs text-slate-400 mt-0.5">Zero failing misconfigurations identified.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
-          {/* Card 2: Execution Latency */}
-          <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
-                Execution Latency
-              </span>
-              <div className="p-1.5 bg-neon-green/10 rounded-lg text-neon-green border border-neon-green/20">
-                <Clock className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-2">
-              <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight">
-                {auditData?.execution_time != null
-                  ? `${auditData.execution_time}s`
-                  : auditData?.scores?.execution_time != null
-                  ? `${auditData.scores.execution_time}s`
-                  : !demoMode
-                  ? '3.42s'
-                  : '0.12s'}
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1 font-mono">
-                <span className="w-1.5 h-1.5 rounded-full bg-neon-green shadow-[0_0_6px_rgba(0,255,157,0.7)]"></span>
-                <span>24 parallel workers</span>
-              </p>
-            </div>
-          </div>
+                  <div className="mt-4 pt-4 border-t border-cyber-700/60 flex items-center justify-between">
+                    <span className="text-xs text-slate-400 font-mono">
+                      Generate remediation playbook or PowerShell execution script:
+                    </span>
+                    <button
+                      onClick={() => setCurrentView('playbooks')}
+                      className="text-xs font-bold text-neon-green hover:underline flex items-center gap-1"
+                    >
+                      <span>Open Remediation Hub</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
 
-          {/* Card 3: Hardened Checks */}
-          <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
-                Hardened
-              </span>
-              <div className="p-1.5 bg-neon-green/10 rounded-lg text-neon-green border border-neon-green/20">
-                <CheckCircle className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-2">
-              <div className="text-2xl sm:text-3xl font-extrabold text-neon-green font-mono tracking-tight text-neon-glow">
-                {auditData?.scores.passed}
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 font-mono">
-                Compliant CIS rules
-              </p>
-            </div>
-          </div>
+                {/* Host Environment & Cryptographic Posture Tile (1 col) */}
+                <div className="cyber-tile p-5 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-white text-base flex items-center gap-2 mb-1">
+                      <Shield className="w-4 h-4 text-neon-green" />
+                      <span>Host Cryptographic Root</span>
+                    </h3>
+                    <p className="text-xs text-slate-400 font-mono mb-4">
+                      ASArP Section 6 Hardware Security Baseline
+                    </p>
 
-          {/* Card 4: Misconfigurations */}
-          <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
-                Misconfigured
-              </span>
-              <div className="p-1.5 bg-rose-500/10 rounded-lg text-rose-400 border border-rose-500/20">
-                <XCircle className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-2">
-              <div className="text-2xl sm:text-3xl font-extrabold text-rose-400 font-mono tracking-tight">
-                {auditData?.scores.failed}
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 font-mono">
-                Remediation candidates
-              </p>
-            </div>
-          </div>
+                    <div className="space-y-3 font-mono text-xs">
+                      <div className="bg-cyber-950 p-3 rounded-xl border border-cyber-750">
+                        <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Host Target</div>
+                        <div className="text-white font-bold text-sm truncate">{auditData?.hostname || 'LOCAL-PC'}</div>
+                        <div className="text-[11px] text-neon-mint mt-0.5">{auditData?.os_version || 'Windows 11'}</div>
+                      </div>
 
-          {/* Card 5: Errors */}
-          <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
-                Exceptions
-              </span>
-              <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-400 border border-amber-500/20">
-                <AlertTriangle className="w-4 h-4" />
+                      <div className="bg-cyber-950 p-3 rounded-xl border border-cyber-750">
+                        <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Hardware Security</div>
+                        <div className="text-neon-green font-bold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
+                          <span>TPM 2.0 • Secure Boot Active</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-1">Direct Kernel WMI / Registry Inspection</div>
+                      </div>
+
+                      <div className="bg-cyber-950 p-3 rounded-xl border border-cyber-750">
+                        <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Anti-TOCTOU Seal</div>
+                        <div className="text-slate-200 truncate">
+                          {auditData?.attestation_seal ? (
+                            <span className="text-neon-green font-bold flex items-center gap-1">
+                              <span>RSA-2048 Signed:</span>
+                              <span className="text-slate-300 font-normal">{auditData.attestation_seal.sha256_hash.slice(0, 10)}...</span>
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">Not sealed yet</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentView('attestation')}
+                    className="mt-4 w-full bg-cyber-850 hover:bg-cyber-800 text-neon-mint hover:text-white border border-cyber-700 hover:border-neon-green/40 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                  >
+                    <span>Inspect Attestation Certificate</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="mt-2">
-              <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono tracking-tight">
-                {auditData?.scores.errors}
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 font-mono">
-                Rule query warnings
-              </p>
-            </div>
-          </div>
-        </div>
+          )}
+
+          {/* VIEW 2: SECURITY FINDINGS (FULL-WIDTH INTERACTIVE RULES TABLE) */}
+          {currentView === 'findings' && (
+            <div className="space-y-4">
 
         {/* Table Toolbar (Cyber Tile Rising on Hover) */}
         <div className="cyber-tile p-3.5 mb-5 no-print">
@@ -2673,18 +4332,18 @@ $failCount = 0
         <div className="cyber-tile overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-cyber-850 border-b border-cyber-700 text-slate-300 text-[11px] font-bold uppercase tracking-wider font-mono">
+              <thead className="bg-cyber-800 border-b-2 border-cyber-600 text-white text-xs font-black uppercase tracking-wider font-mono shadow-sm">
                 <tr>
-                  <th className="px-3.5 py-3 text-center w-12">#</th>
-                  <th className="px-4 py-3 text-left w-36">Rule ID</th>
-                  <th className="px-5 py-3 text-left">Description & Category</th>
-                  <th className="px-3.5 py-3 text-center w-24">Severity</th>
-                  <th className="px-4 py-3 text-left w-28">Expected</th>
-                  <th className="px-4 py-3 text-left w-28">Actual</th>
-                  <th className="px-4 py-3 text-left w-40">MITRE ATT&CK</th>
-                  <th className="px-3 py-3 text-center w-24">Latency</th>
-                  <th className="px-3.5 py-3 text-center w-24">Status</th>
-                  <th className="px-4 py-3 text-center w-28 no-print">Action</th>
+                  <th className="px-3.5 py-3.5 text-center w-12 font-extrabold text-white">#</th>
+                  <th className="px-4 py-3.5 text-left w-36 font-extrabold text-white">RULE ID</th>
+                  <th className="px-5 py-3.5 text-left font-extrabold text-white">DESCRIPTION & CATEGORY</th>
+                  <th className="px-3.5 py-3.5 text-center w-24 font-extrabold text-white">SEVERITY</th>
+                  <th className="px-4 py-3.5 text-left w-28 font-extrabold text-white">EXPECTED</th>
+                  <th className="px-4 py-3.5 text-left w-28 font-extrabold text-white">ACTUAL</th>
+                  <th className="px-4 py-3.5 text-left w-40 font-extrabold text-white">MITRE ATT&CK</th>
+                  <th className="px-3 py-3.5 text-center w-24 font-extrabold text-white">LATENCY</th>
+                  <th className="px-3.5 py-3.5 text-center w-24 font-extrabold text-white">STATUS</th>
+                  <th className="px-4 py-3.5 text-center w-28 no-print font-extrabold text-white">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-cyber-800">
@@ -2780,47 +4439,73 @@ $failCount = 0
           </div>
         </div>
 
-        {filteredResults.length === 0 && (
-          <div className="text-center py-12 text-slate-400 cyber-tile mt-4">
-            <Search className="w-8 h-8 mx-auto mb-2 text-slate-500" />
-            <p className="font-semibold text-slate-200 text-sm">No security rules found</p>
-            <p className="text-xs text-slate-500 mt-0.5">Try adjusting your filter or search query.</p>
-          </div>
-        )}
+              {filteredResults.length === 0 && (
+                <div className="text-center py-12 text-slate-400 cyber-tile mt-4">
+                  <Search className="w-8 h-8 mx-auto mb-2 text-slate-500" />
+                  <p className="font-semibold text-slate-200 text-sm">No security rules found</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Try adjusting your filter or search query.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* VIEW 3: RULE STUDIO & BENCHMARKS */}
+          {currentView === 'rule-studio' && (
+            <RuleStudioModal
+              isInline={true}
+              onRulesChanged={() => {
+                fetchAudit(demoMode)
+                fetchRulesStats()
+              }}
+            />
+          )}
+
+          {/* VIEW 4: AUDIT COMPARISON & PERFORMANCE EVALUATION */}
+          {currentView === 'compare' && (
+            <CompareModal
+              isInline={true}
+              currentScanId={auditData?.scan_id}
+            />
+          )}
+
+          {/* VIEW 5: HISTORICAL AUDITS TIMELINE */}
+          {currentView === 'history' && (
+            <HistoryDrawer
+              isInline={true}
+              onSelectScan={(scanId) => {
+                loadHistoricalScan(scanId)
+                setCurrentView('overview')
+              }}
+            />
+          )}
+
+          {/* VIEW 6: CRYPTOGRAPHIC ATTESTATION SEAL */}
+          {currentView === 'attestation' && (
+            <AttestationDrawer
+              isInline={true}
+              auditData={auditData}
+              verificationResult={verificationResult}
+              verifying={verifying}
+              onVerify={verifySeal}
+            />
+          )}
+
+          {/* VIEW 7: REMEDIATION PLAYBOOKS HUB */}
+          {currentView === 'playbooks' && (
+            <PlaybooksView
+              auditData={auditData}
+              onDownloadPdf={downloadFixScriptPdf}
+              onDownloadPs1={downloadFixScriptPs1}
+            />
+          )}
+        </main>
       </div>
 
-      {/* Remediation Drawer */}
+      {/* Slide-out Remediation Drawer (Rule Details & Direct Fix Script) */}
       {selectedRule && (
         <RemediationDrawer
           rule={selectedRule}
           onClose={() => setSelectedRule(null)}
-        />
-      )}
-
-      {/* History Drawer */}
-      {showHistory && (
-        <HistoryDrawer
-          onClose={() => setShowHistory(false)}
-          onSelectScan={loadHistoricalScan}
-        />
-      )}
-
-      {/* Attestation Seal Drawer */}
-      {showAttestation && (
-        <AttestationDrawer
-          auditData={auditData}
-          onClose={() => setShowAttestation(false)}
-          verificationResult={verificationResult}
-          verifying={verifying}
-          onVerify={verifySeal}
-        />
-      )}
-
-      {/* Compare Modal */}
-      {showCompare && (
-        <CompareModal
-          onClose={() => setShowCompare(false)}
-          currentScanId={auditData?.scan_id}
         />
       )}
 
