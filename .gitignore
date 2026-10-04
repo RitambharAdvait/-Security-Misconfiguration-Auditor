@@ -1,8 +1,45 @@
+﻿# ==============================================================================
+# Enterprise Git Ignore Rules - Windows Security Misconfiguration Auditor
+# ==============================================================================
+
+# Python Bytecode & Environments
 __pycache__/
-*.pyc
+*.py[cod]
+*.class
 venv/
+env/
+.env
+
+# Cryptographic Keys & Private Credentials (RFC 8785 Anti-TOCTOU)
+certs/*.pem
+certs/*.key
+certs/*.crt
+!certs/.gitkeep
+
+# Scan Artifacts (Local host runtime outputs)
+scans/audit_*.json
+!scans/.gitkeep
+!scans/sample_audit.json
+
+# Reports & Office Documents
+*.docx
+*.pptx
+*.xlsx
+*.pdf
+reports/
 audit_report.html
-.claude/
+
+# Frontend Builds & Dependencies
 frontend/node_modules/
-certs/
-*.pem
+frontend/dist/
+frontend/.oxlint_cache/
+.eslintcache
+
+# Editor & OS Metadata
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
