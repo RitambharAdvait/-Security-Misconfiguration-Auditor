@@ -12,18 +12,18 @@ export default {
       },
       colors: {
         cyber: {
-          950: '#0a1520', // Base deep cyber background
-          900: '#0f1f2e', // Main canvas background
-          850: '#162a3d', // Card & tile background
-          800: '#1d364e', // Elevated panels & headers
-          750: '#254360', // Interactive components
-          700: '#2f5376', // Borders & dividers
-          600: '#3d6994', // Accent borders
-          500: '#4f82b3',
-          400: '#699fcb',
-          300: '#90bde3',
-          200: '#c2ddf0',
-          100: '#e5f2fa',
+          950: '#060f17', // Deepest background / inner capsules
+          900: '#0a1724', // Main canvas background
+          850: '#142c44', // Card & tile background (elevated from canvas)
+          800: '#1a3a5a', // Elevated panels, table headers & hover states
+          750: '#234c74', // Interactive component containers
+          700: '#316394', // Borders & clear dividers
+          600: '#4683be', // Accent borders & prominent lines
+          500: '#639dd6',
+          400: '#87b8e5',
+          300: '#abd1f2',
+          200: '#d1e6fa',
+          100: '#edf5fd',
         },
         neon: {
           green: '#00ff9d', // Electric cyber green

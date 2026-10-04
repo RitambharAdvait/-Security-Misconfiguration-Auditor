@@ -8,25 +8,34 @@ import {
   History, Printer, Clock, Eye, ArrowRight, Lock,
   GitCompare, ArrowUpRight, ArrowDownRight, Zap, TrendingUp, TrendingDown,
   Sliders, Plus, Edit2, Trash2, RotateCcw, BookOpen, Layers, Terminal, Sparkles, Filter, Database, FileText,
-  LayoutDashboard, ChevronLeft, ChevronRight, FileCode, CheckSquare, Award, Menu, PanelLeftClose, PanelLeftOpen
+  LayoutDashboard, ChevronLeft, ChevronRight, FileCode, CheckSquare, Award, Menu, PanelLeftClose, PanelLeftOpen,
+  Sun, Moon
 } from 'lucide-react'
 
 const API_BASE_URL = 'http://localhost:8000'
 
 // Circular SVG Compliance Gauge Component
 // Circular SVG Compliance Gauge Component
-function ComplianceGauge({ score, size = 115 }) {
+function ComplianceGauge({ score, size = 115, theme = 'dark' }) {
   const radius = (size - 18) / 2
   const circumference = 2 * Math.PI * radius
   const progress = (score / 100) * circumference
 
+  const isLight = theme === 'light'
+
   const getColor = () => {
+    if (isLight) {
+      if (score >= 70) return '#2563eb' // Royal Blue in light mode
+      if (score >= 40) return '#d97706' // Warning Amber
+      return '#dc2626' // Red
+    }
     if (score >= 70) return '#00ff9d' // Neon Cyber Green
     if (score >= 40) return '#f59e0b' // Warning Amber
     return '#f43f5e' // Rose Red Fail
   }
 
   const color = getColor()
+  const trackStroke = isLight ? '#e2e8f0' : '#10222e'
 
   return (
     <div className="relative inline-flex items-center justify-center">
@@ -37,10 +46,10 @@ function ComplianceGauge({ score, size = 115 }) {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#10222e"
+          stroke={trackStroke}
           strokeWidth="8"
         />
-        {/* Progress circle with cyber glow */}
+        {/* Progress circle with glow */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -52,13 +61,22 @@ function ComplianceGauge({ score, size = 115 }) {
           strokeDashoffset={circumference - progress}
           strokeLinecap="round"
           className="transition-all duration-1000 ease-out"
-          style={{ filter: score >= 70 ? 'drop-shadow(0 0 6px rgba(0, 255, 157, 0.5))' : undefined }}
+          style={{
+            filter: score >= 70
+              ? (isLight ? 'drop-shadow(0 0 6px rgba(37, 99, 235, 0.4))' : 'drop-shadow(0 0 6px rgba(0, 255, 157, 0.5))')
+              : undefined
+          }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <span
           className="text-2xl font-mono font-extrabold tracking-tight"
-          style={{ color, textShadow: score >= 70 ? '0 0 12px rgba(0, 255, 157, 0.4)' : undefined }}
+          style={{
+            color,
+            textShadow: score >= 70
+              ? (isLight ? '0 0 8px rgba(37, 99, 235, 0.25)' : '0 0 12px rgba(0, 255, 157, 0.4)')
+              : undefined
+          }}
         >
           {score}%
         </span>
@@ -71,7 +89,7 @@ function ComplianceGauge({ score, size = 115 }) {
 }
 
 // Compliance History Chart Component
-function ComplianceHistoryChart({ data }) {
+function ComplianceHistoryChart({ data, theme = 'dark' }) {
   if (!data || data.length < 2) {
     return (
       <div className="cyber-tile p-5 mb-6 text-center">
@@ -79,6 +97,12 @@ function ComplianceHistoryChart({ data }) {
       </div>
     )
   }
+
+  const isLight = theme === 'light'
+  const chartBlue = '#2563eb'
+  const primaryStroke = isLight ? chartBlue : '#00ff9d'
+  const gridStroke = isLight ? '#cbd5e1' : '#1b374b'
+  const nodeFill = isLight ? '#ffffff' : '#071219'
 
   // 1. Chronological Sorting: older scans on the left, latest scan on the right
   const chartData = [...data]
@@ -126,44 +150,62 @@ function ComplianceHistoryChart({ data }) {
           Continuous Monitoring & Drift Tracking (ASArP Framework)
         </p>
         <div className="flex flex-wrap gap-2.5 mt-2.5">
-          <span className="bg-cyber-950 px-3 py-1 rounded-lg text-xs font-mono font-bold text-neon-green border border-neon-green/30 shadow-[0_0_10px_rgba(0,255,157,0.15)]">
+          <span className={`px-3 py-1 rounded-lg text-xs font-mono font-bold border ${
+            isLight
+              ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm'
+              : 'bg-cyber-950 text-neon-green border-neon-green/30 shadow-[0_0_10px_rgba(0,255,157,0.15)]'
+          }`}>
             Latest: {latestScore}%
           </span>
-          <span className="bg-cyber-950 px-3 py-1 rounded-lg text-xs font-mono font-bold text-slate-200 border border-cyber-700">
+          <span className={`px-3 py-1 rounded-lg text-xs font-mono font-bold border ${
+            isLight
+              ? 'bg-slate-100 text-slate-700 border-slate-300'
+              : 'bg-cyber-950 text-slate-200 border-cyber-700'
+          }`}>
             Average: {averageScore}%
           </span>
-          <span className="bg-cyber-950 px-3 py-1 rounded-lg text-xs font-mono font-bold text-slate-400 border border-cyber-750">
+          <span className={`px-3 py-1 rounded-lg text-xs font-mono font-bold border ${
+            isLight
+              ? 'bg-slate-100 text-slate-500 border-slate-300'
+              : 'bg-cyber-950 text-slate-400 border border-cyber-750'
+          }`}>
             Scans Tracked: {scansTracked}
           </span>
         </div>
       </div>
 
       <svg viewBox="0 0 520 175" className="w-full h-44 overflow-visible">
-        {/* Cyber Neon Green Gradient fill */}
+        {/* Gradient fill */}
         <defs>
           <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(0, 255, 157, 0.35)" />
-            <stop offset="100%" stopColor="rgba(0, 255, 157, 0.0)" />
+            <stop
+              offset="0%"
+              stopColor={isLight ? 'rgba(37, 99, 235, 0.35)' : 'rgba(0, 255, 157, 0.35)'}
+            />
+            <stop
+              offset="100%"
+              stopColor={isLight ? 'rgba(37, 99, 235, 0.0)' : 'rgba(0, 255, 157, 0.0)'}
+            />
           </linearGradient>
         </defs>
 
         {/* Horizontal grid lines and labels */}
         <g className="text-[10px] font-mono">
           {/* 100% line (top) at y = 30 */}
-          <line x1="50" y1="30" x2="480" y2="30" stroke="#1b374b" strokeDasharray="4,2" />
-          <text x="42" y="34" textAnchor="end" className="text-[10px] fill-slate-500 font-mono">
+          <line x1="50" y1="30" x2="480" y2="30" stroke={gridStroke} strokeDasharray="4,2" />
+          <text x="42" y="34" textAnchor="end" className="text-[10px] fill-slate-400 font-mono">
             100%
           </text>
 
           {/* 50% line (middle) at y = 85 */}
-          <line x1="50" y1="85" x2="480" y2="85" stroke="#1b374b" strokeDasharray="4,2" />
-          <text x="42" y="89" textAnchor="end" className="text-[10px] fill-slate-500 font-mono">
+          <line x1="50" y1="85" x2="480" y2="85" stroke={gridStroke} strokeDasharray="4,2" />
+          <text x="42" y="89" textAnchor="end" className="text-[10px] fill-slate-400 font-mono">
             50%
           </text>
 
           {/* 0% line (baseline) at y = 140 */}
-          <line x1="50" y1="140" x2="480" y2="140" stroke="#1b374b" strokeDasharray="4,2" />
-          <text x="42" y="144" textAnchor="end" className="text-[10px] fill-slate-500 font-mono">
+          <line x1="50" y1="140" x2="480" y2="140" stroke={gridStroke} strokeDasharray="4,2" />
+          <text x="42" y="144" textAnchor="end" className="text-[10px] fill-slate-400 font-mono">
             0%
           </text>
         </g>
@@ -171,30 +213,43 @@ function ComplianceHistoryChart({ data }) {
         {/* Shaded Area strictly under the curve */}
         <path fill="url(#scoreGradient)" d={pathD} />
 
-        {/* Trend Polyline with neon glow */}
+        {/* Trend Polyline */}
         <polyline
           fill="none"
-          stroke="#00ff9d"
+          stroke={primaryStroke}
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: 'drop-shadow(0 0 6px rgba(0, 255, 157, 0.5))' }}
+          style={{
+            filter: isLight
+              ? 'drop-shadow(0 2px 4px rgba(37, 99, 235, 0.3))'
+              : 'drop-shadow(0 0 6px rgba(0, 255, 157, 0.5))'
+          }}
           points={points.map(p => `${p.x},${p.y}`).join(' ')}
         />
 
         {/* Node Points, Clean Score Labels, and Baseline Timestamps */}
         {points.map((p, idx) => (
           <g key={idx}>
-            {/* Circle Node: Cyber Black center with glowing Neon Green border */}
-            <circle cx={p.x} cy={p.y} r="5" fill="#071219" stroke="#00ff9d" strokeWidth="2.5" />
+            {/* Circle Node */}
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r="5"
+              fill={nodeFill}
+              stroke={primaryStroke}
+              strokeWidth="2.5"
+            />
 
             {/* Score Text Label */}
             <text
               x={p.x}
               y={p.y - 10}
               textAnchor="middle"
-              className="text-[11px] font-mono font-bold fill-neon-green"
-              style={{ textShadow: '0 0 6px rgba(0, 255, 157, 0.5)' }}
+              className={`text-[11px] font-mono font-bold ${isLight ? 'fill-blue-600' : 'fill-neon-green'}`}
+              style={{
+                textShadow: isLight ? 'none' : '0 0 6px rgba(0, 255, 157, 0.5)'
+              }}
             >
               {p.score}%
             </text>
@@ -3174,6 +3229,9 @@ function PlaybooksView({ auditData, onDownloadPdf, onDownloadPs1 }) {
 }
 
 function App() {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('asarp-theme') || 'dark'
+  })
   const [auditData, setAuditData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -3191,6 +3249,24 @@ function App() {
   const [showRuleStudio, setShowRuleStudio] = useState(false)
   const [rulesStats, setRulesStats] = useState(null)
   const [historyScans, setHistoryScans] = useState([])
+
+  // Toggle theme handler
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(nextTheme)
+    localStorage.setItem('asarp-theme', nextTheme)
+  }
+
+  // Apply theme class to root html/body
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('theme-light')
+      document.body.classList.add('theme-light')
+    } else {
+      document.documentElement.classList.remove('theme-light')
+      document.body.classList.remove('theme-light')
+    }
+  }, [theme])
 
   const fetchHistoryScans = async () => {
     try {
@@ -3619,6 +3695,15 @@ $failCount = 0
   }) || []
 
   const getSeverityColor = (severity) => {
+    if (theme === 'light') {
+      const lightColors = {
+        CRITICAL: 'bg-rose-100 text-rose-800 border-rose-300 font-bold shadow-sm',
+        HIGH: 'bg-amber-100 text-amber-800 border-amber-300 font-bold shadow-sm',
+        MEDIUM: 'bg-yellow-100 text-yellow-800 border-yellow-300 font-bold',
+        LOW: 'bg-slate-100 text-slate-700 border-slate-300'
+      }
+      return lightColors[severity] || 'bg-slate-100 text-slate-700 border-slate-300'
+    }
     const colors = {
       CRITICAL: 'bg-rose-950/80 text-rose-300 border-rose-500/60 shadow-[0_0_8px_rgba(244,63,94,0.25)]',
       HIGH: 'bg-amber-950/80 text-amber-300 border-amber-500/60 shadow-[0_0_8px_rgba(245,158,11,0.2)]',
@@ -3971,21 +4056,21 @@ $failCount = 0
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Card 1: Risk Gauge */}
                 <div className="cyber-tile p-4 flex items-center justify-center cursor-default">
-                  <ComplianceGauge score={auditData?.scores?.weighted_score || 0} size={115} />
+                  <ComplianceGauge score={auditData?.scores?.weighted_score || 0} size={115} theme={theme} />
                 </div>
 
                 {/* Card 2: Execution Latency */}
                 <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
+                    <span className="text-xs text-slate-200 font-mono font-bold uppercase tracking-wider">
                       Execution Latency
                     </span>
-                    <div className="p-1.5 bg-neon-green/10 rounded-lg text-neon-green border border-neon-green/20">
+                    <div className="p-1.5 bg-neon-green/10 rounded-lg text-neon-green border border-neon-green/30">
                       <Clock className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="mt-2">
-                    <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight drop-shadow-sm">
                       {auditData?.execution_time != null
                         ? `${auditData.execution_time}s`
                         : auditData?.scores?.execution_time != null
@@ -3994,8 +4079,8 @@ $failCount = 0
                         ? '3.42s'
                         : '0.12s'}
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1 font-mono">
-                      <span className="w-1.5 h-1.5 rounded-full bg-neon-green shadow-[0_0_6px_rgba(0,255,157,0.7)]"></span>
+                    <p className="text-[11px] text-slate-300 mt-1 flex items-center gap-1.5 font-mono">
+                      <span className="w-2 h-2 rounded-full bg-neon-green shadow-[0_0_8px_rgba(0,255,157,0.9)]"></span>
                       <span>24 parallel workers</span>
                     </p>
                   </div>
@@ -4004,18 +4089,18 @@ $failCount = 0
                 {/* Card 3: Hardened Checks */}
                 <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
+                    <span className="text-xs text-slate-200 font-mono font-bold uppercase tracking-wider">
                       Hardened
                     </span>
-                    <div className="p-1.5 bg-neon-green/10 rounded-lg text-neon-green border border-neon-green/20">
+                    <div className="p-1.5 bg-neon-green/10 rounded-lg text-neon-green border border-neon-green/30">
                       <CheckCircle className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="mt-2">
-                    <div className="text-2xl sm:text-3xl font-extrabold text-neon-green font-mono tracking-tight text-neon-glow">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-neon-green font-mono tracking-tight text-neon-glow drop-shadow-sm">
                       {auditData?.scores?.passed || 0}
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                    <p className="text-[11px] text-slate-300 mt-1 font-mono">
                       Compliant CIS rules
                     </p>
                   </div>
@@ -4024,18 +4109,18 @@ $failCount = 0
                 {/* Card 4: Misconfigurations */}
                 <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
+                    <span className="text-xs text-slate-200 font-mono font-bold uppercase tracking-wider">
                       Misconfigured
                     </span>
-                    <div className="p-1.5 bg-rose-500/10 rounded-lg text-rose-400 border border-rose-500/20">
+                    <div className="p-1.5 bg-rose-500/10 rounded-lg text-rose-400 border border-rose-500/30">
                       <XCircle className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="mt-2">
-                    <div className="text-2xl sm:text-3xl font-extrabold text-rose-400 font-mono tracking-tight">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-rose-400 font-mono tracking-tight drop-shadow-sm">
                       {auditData?.scores?.failed || 0}
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                    <p className="text-[11px] text-slate-300 mt-1 font-mono">
                       Remediation candidates
                     </p>
                   </div>
@@ -4044,18 +4129,18 @@ $failCount = 0
                 {/* Card 5: Errors */}
                 <div className="cyber-tile p-4 flex flex-col justify-between cursor-default">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">
+                    <span className="text-xs text-slate-200 font-mono font-bold uppercase tracking-wider">
                       Exceptions
                     </span>
-                    <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-400 border border-amber-500/20">
+                    <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-400 border border-amber-500/30">
                       <AlertTriangle className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="mt-2">
-                    <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono tracking-tight">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-amber-300 font-mono tracking-tight drop-shadow-sm">
                       {auditData?.scores?.errors || 0}
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                    <p className="text-[11px] text-slate-300 mt-1 font-mono">
                       Rule query warnings
                     </p>
                   </div>
@@ -4064,7 +4149,7 @@ $failCount = 0
 
               {/* Compliance Trend Chart */}
               {historyScans.length >= 2 && (
-                <ComplianceHistoryChart data={historyScans} />
+                <ComplianceHistoryChart data={historyScans} theme={theme} />
               )}
 
               {/* Two Column Layout: Quick Remediation Candidates & Platform Hardware Profile */}
@@ -4097,43 +4182,43 @@ $failCount = 0
                           <div
                             key={rule.rule_id}
                             onClick={() => setSelectedRule(rule)}
-                            className="bg-cyber-950/70 hover:bg-cyber-900 border border-cyber-750 hover:border-neon-green/40 p-3 rounded-xl transition cursor-pointer flex items-center justify-between gap-3 group"
+                            className="bg-[#102235] hover:bg-[#193754] border border-[#2d5f8b] hover:border-neon-green/60 p-3.5 rounded-xl transition cursor-pointer flex items-center justify-between gap-3 group shadow-sm"
                           >
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="font-mono text-xs font-bold text-neon-green bg-cyber-900 px-2 py-0.5 rounded border border-cyber-700">
+                                <span className="font-mono text-xs font-bold text-neon-green bg-[#07131e] px-2.5 py-0.5 rounded border border-[#2d5f8b]">
                                   {rule.rule_id}
                                 </span>
                                 <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border ${getSeverityColor(rule.severity)}`}>
                                   {rule.severity}
                                 </span>
-                                <span className="text-xs text-slate-200 font-medium truncate">
+                                <span className="text-xs text-white font-semibold truncate">
                                   {rule.description}
                                 </span>
                               </div>
-                              <div className="text-[11px] font-mono text-slate-400 mt-1 flex items-center gap-2">
-                                <span>Expected: <strong className="text-slate-300">{rule.expected_value}</strong></span>
-                                <span className="text-cyber-600">•</span>
-                                <span className="text-rose-400">Observed: {rule.error || String(rule.actual_value)}</span>
+                              <div className="text-[11px] font-mono text-slate-300 mt-1 flex items-center gap-2">
+                                <span>Expected: <strong className="text-neon-mint font-bold">{rule.expected_value}</strong></span>
+                                <span className="text-[#3b6d9e]">•</span>
+                                <span className="text-rose-300 font-bold">Observed: {rule.error || String(rule.actual_value)}</span>
                               </div>
                             </div>
-                            <button className="flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-lg bg-rose-950/70 text-rose-300 border border-rose-700/60 group-hover:bg-rose-900 transition">
+                            <button className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg bg-rose-900/90 text-rose-100 border border-rose-500 group-hover:bg-rose-800 transition shadow-sm">
                               Fix →
                             </button>
                           </div>
                         ))
                       ) : (
-                        <div className="p-8 text-center text-slate-400">
+                        <div className="p-8 text-center text-slate-300">
                           <CheckCircle className="w-8 h-8 text-neon-green mx-auto mb-2" />
-                          <p className="text-sm font-semibold text-white">All checks compliant!</p>
-                          <p className="text-xs text-slate-400 mt-0.5">Zero failing misconfigurations identified.</p>
+                          <p className="text-sm font-bold text-white">All checks compliant!</p>
+                          <p className="text-xs text-slate-300 mt-0.5">Zero failing misconfigurations identified.</p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-cyber-700/60 flex items-center justify-between">
-                    <span className="text-xs text-slate-400 font-mono">
+                  <div className="mt-4 pt-4 border-t border-[#234769] flex items-center justify-between">
+                    <span className="text-xs text-slate-300 font-mono">
                       Generate remediation playbook or PowerShell execution script:
                     </span>
                     <button
@@ -4153,33 +4238,33 @@ $failCount = 0
                       <Shield className="w-4 h-4 text-neon-green" />
                       <span>Host Cryptographic Root</span>
                     </h3>
-                    <p className="text-xs text-slate-400 font-mono mb-4">
+                    <p className="text-xs text-slate-300 font-mono mb-4">
                       ASArP Section 6 Hardware Security Baseline
                     </p>
 
                     <div className="space-y-3 font-mono text-xs">
-                      <div className="bg-cyber-950 p-3 rounded-xl border border-cyber-750">
-                        <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Host Target</div>
-                        <div className="text-white font-bold text-sm truncate">{auditData?.hostname || 'LOCAL-PC'}</div>
-                        <div className="text-[11px] text-neon-mint mt-0.5">{auditData?.os_version || 'Windows 11'}</div>
+                      <div className="bg-[#102235] p-3 rounded-xl border border-[#2d5f8b]">
+                        <div className="text-[10px] text-slate-300 uppercase font-bold mb-1">Host Target</div>
+                        <div className="text-white font-extrabold text-sm truncate">{auditData?.hostname || 'LOCAL-PC'}</div>
+                        <div className="text-[11px] text-neon-mint mt-0.5 font-bold">{auditData?.os_version || 'Windows 11'}</div>
                       </div>
 
-                      <div className="bg-cyber-950 p-3 rounded-xl border border-cyber-750">
-                        <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Hardware Security</div>
-                        <div className="text-neon-green font-bold flex items-center gap-1.5">
+                      <div className="bg-[#102235] p-3 rounded-xl border border-[#2d5f8b]">
+                        <div className="text-[10px] text-slate-300 uppercase font-bold mb-1">Hardware Security</div>
+                        <div className="text-neon-green font-extrabold flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
                           <span>TPM 2.0 • Secure Boot Active</span>
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-1">Direct Kernel WMI / Registry Inspection</div>
+                        <div className="text-[10px] text-slate-300 mt-1">Direct Kernel WMI / Registry Inspection</div>
                       </div>
 
-                      <div className="bg-cyber-950 p-3 rounded-xl border border-cyber-750">
-                        <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Anti-TOCTOU Seal</div>
-                        <div className="text-slate-200 truncate">
+                      <div className="bg-[#102235] p-3 rounded-xl border border-[#2d5f8b]">
+                        <div className="text-[10px] text-slate-300 uppercase font-bold mb-1">Anti-TOCTOU Seal</div>
+                        <div className="text-slate-100 truncate">
                           {auditData?.attestation_seal ? (
                             <span className="text-neon-green font-bold flex items-center gap-1">
                               <span>RSA-2048 Signed:</span>
-                              <span className="text-slate-300 font-normal">{auditData.attestation_seal.sha256_hash.slice(0, 10)}...</span>
+                              <span className="text-slate-200 font-mono">{auditData.attestation_seal.sha256_hash.slice(0, 10)}...</span>
                             </span>
                           ) : (
                             <span className="text-slate-400">Not sealed yet</span>
@@ -4332,40 +4417,40 @@ $failCount = 0
         <div className="cyber-tile overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-cyber-800 border-b-2 border-cyber-600 text-white text-xs font-black uppercase tracking-wider font-mono shadow-sm">
+              <thead className="bg-[#183654] border-b-2 border-[#3b6d9e] text-white text-xs font-black uppercase tracking-wider font-mono shadow-sm">
                 <tr>
-                  <th className="px-3.5 py-3.5 text-center w-12 font-extrabold text-white">#</th>
-                  <th className="px-4 py-3.5 text-left w-36 font-extrabold text-white">RULE ID</th>
+                  <th className="px-3.5 py-3.5 text-center w-12 font-extrabold text-slate-200">#</th>
+                  <th className="px-4 py-3.5 text-left w-36 font-extrabold text-neon-green tracking-wide">RULE ID</th>
                   <th className="px-5 py-3.5 text-left font-extrabold text-white">DESCRIPTION & CATEGORY</th>
-                  <th className="px-3.5 py-3.5 text-center w-24 font-extrabold text-white">SEVERITY</th>
-                  <th className="px-4 py-3.5 text-left w-28 font-extrabold text-white">EXPECTED</th>
-                  <th className="px-4 py-3.5 text-left w-28 font-extrabold text-white">ACTUAL</th>
-                  <th className="px-4 py-3.5 text-left w-40 font-extrabold text-white">MITRE ATT&CK</th>
-                  <th className="px-3 py-3.5 text-center w-24 font-extrabold text-white">LATENCY</th>
-                  <th className="px-3.5 py-3.5 text-center w-24 font-extrabold text-white">STATUS</th>
-                  <th className="px-4 py-3.5 text-center w-28 no-print font-extrabold text-white">ACTION</th>
+                  <th className="px-3.5 py-3.5 text-center w-24 font-extrabold text-slate-200">SEVERITY</th>
+                  <th className="px-4 py-3.5 text-left w-28 font-extrabold text-slate-200">EXPECTED</th>
+                  <th className="px-4 py-3.5 text-left w-28 font-extrabold text-slate-200">ACTUAL</th>
+                  <th className="px-4 py-3.5 text-left w-40 font-extrabold text-slate-200">MITRE ATT&CK</th>
+                  <th className="px-3 py-3.5 text-center w-24 font-extrabold text-slate-200">LATENCY</th>
+                  <th className="px-3.5 py-3.5 text-center w-24 font-extrabold text-slate-200">STATUS</th>
+                  <th className="px-4 py-3.5 text-center w-28 no-print font-extrabold text-slate-200">ACTION</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-cyber-800">
+              <tbody className="divide-y divide-[#234769]">
                 {filteredResults.map((result, idx) => (
                   <tr
                     key={result.rule_id}
                     onClick={() => setSelectedRule(result)}
-                    className="odd:bg-cyber-900/90 even:bg-cyber-850/50 hover:bg-cyber-800/80 transition cursor-pointer group"
+                    className="odd:bg-[#132a40] even:bg-[#18344e] hover:bg-[#204566] transition cursor-pointer group"
                   >
-                    <td className="px-3.5 py-3 text-center text-xs font-mono font-semibold text-slate-500">
+                    <td className="px-3.5 py-3 text-center text-xs font-mono font-bold text-slate-300">
                       {idx + 1}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <code className="text-xs font-mono font-bold text-neon-green bg-cyber-950 border border-cyber-750 px-2 py-0.5 rounded shadow-inner">
+                      <code className="text-xs font-mono font-bold text-neon-green bg-[#0b1824] border border-[#2d5f8b] px-2.5 py-1 rounded shadow-inner">
                         {result.rule_id}
                       </code>
                     </td>
                     <td className="px-5 py-3">
-                      <div className="text-xs font-semibold text-slate-100 group-hover:text-neon-mint transition leading-snug">
+                      <div className="text-xs font-bold text-white group-hover:text-neon-mint transition leading-snug">
                         {result.description}
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5 font-medium font-mono">{result.category}</div>
+                      <div className="text-[11px] text-slate-300 mt-0.5 font-medium font-mono">{result.category}</div>
                     </td>
                     <td className="px-3.5 py-3 text-center whitespace-nowrap">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${getSeverityColor(result.severity)}`}>
@@ -4373,42 +4458,42 @@ $failCount = 0
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <code className="text-xs font-mono bg-cyber-950 px-2 py-0.5 rounded border border-cyber-800 text-slate-300">
+                      <code className="text-xs font-mono bg-[#0b1824] px-2.5 py-1 rounded border border-[#2d5f8b] text-neon-mint font-semibold">
                         {String(result.expected_value)}
                       </code>
                     </td>
                     <td className="px-4 py-3">
-                      <code className={`text-xs font-mono px-2 py-0.5 rounded border ${
+                      <code className={`text-xs font-mono px-2.5 py-1 rounded border ${
                         result.status === 'FAIL'
-                          ? 'bg-rose-950/80 border-rose-500/60 text-rose-300 font-bold'
-                          : 'bg-cyber-950 border-cyber-800 text-slate-300'
+                          ? 'bg-rose-950/90 border-rose-500 text-rose-200 font-extrabold shadow-sm'
+                          : 'bg-[#0b1824] border-[#2d5f8b] text-slate-200 font-semibold'
                       }`}>
                         {result.error || String(result.actual_value)}
                       </code>
                     </td>
                     <td className="px-4 py-3">
                       <div className="text-xs">
-                        <div className="font-mono text-neon-mint font-semibold text-[11px]">
+                        <div className="font-mono text-neon-mint font-bold text-[11px]">
                           {result.mitre_technique}
                         </div>
-                        <div className="text-slate-400 text-[11px] truncate max-w-[130px]" title={result.mitre_name}>
+                        <div className="text-slate-300 text-[11px] truncate max-w-[130px] font-medium" title={result.mitre_name}>
                           {result.mitre_name}
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-3 text-center whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 bg-cyber-950 px-2 py-0.5 rounded border border-cyber-800">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-200 bg-[#0b1824] px-2 py-0.5 rounded border border-[#2d5f8b]">
                         <Clock className="w-3 h-3 text-neon-green" />
                         {result.execution_time != null ? `${result.execution_time}s` : '—'}
                       </span>
                     </td>
                     <td className="px-3.5 py-3 text-center whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold border ${
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
                         result.status === 'PASS'
-                          ? 'bg-emerald-950/80 text-neon-green border-emerald-500/40 shadow-[0_0_8px_rgba(0,255,157,0.2)]'
+                          ? 'bg-emerald-950/90 text-neon-green border-emerald-400/60 shadow-[0_0_8px_rgba(0,255,157,0.25)]'
                           : result.status === 'FAIL'
-                          ? 'bg-rose-950/80 text-rose-300 border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.2)]'
-                          : 'bg-amber-950/80 text-amber-300 border-amber-500/40'
+                          ? 'bg-rose-950/90 text-rose-200 border-rose-500/70 shadow-[0_0_8px_rgba(244,63,94,0.3)]'
+                          : 'bg-amber-950/90 text-amber-200 border-amber-500/60'
                       }`}>
                         {result.status}
                       </span>
@@ -4421,12 +4506,12 @@ $failCount = 0
                       }}
                     >
                       {result.status === 'FAIL' ? (
-                        <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-950/80 text-rose-300 hover:bg-rose-900 border border-rose-700/60 shadow-sm transition">
+                        <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-900/90 text-rose-100 hover:bg-rose-800 border border-rose-500 shadow-sm transition">
                           <Eye className="w-3 h-3" />
                           <span>Remediate →</span>
                         </button>
                       ) : (
-                        <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-cyber-800 text-neon-mint hover:bg-cyber-750 border border-cyber-700 hover:border-neon-green/40 shadow-sm transition">
+                        <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#142c44] text-neon-mint hover:bg-[#1c3e60] border border-[#3b6d9e] hover:border-neon-green shadow-sm transition">
                           <span>Inspect</span>
                           <ArrowRight className="w-3 h-3 text-neon-green" />
                         </button>
@@ -4508,6 +4593,41 @@ $failCount = 0
           onClose={() => setSelectedRule(null)}
         />
       )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* GLOBAL CIRCULAR THEME TOGGLE BUTTON (BOTTOM RIGHT OF SCREEN)           */}
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      <div className="fixed bottom-6 right-6 z-50 no-print">
+        <button
+          onClick={toggleTheme}
+          className={`theme-toggle-btn group relative flex items-center justify-center w-14 h-14 rounded-full transition-all duration-300 shadow-2xl focus:outline-none focus:ring-4 focus:ring-neon-green/30 ${
+            theme === 'dark'
+              ? 'bg-cyber-850 hover:bg-cyber-800 text-amber-400 border-2 border-amber-400/50 hover:border-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.35)] hover:scale-110 active:scale-95'
+              : 'bg-white hover:bg-slate-50 text-indigo-600 border-2 border-indigo-400 shadow-[0_4px_20px_rgba(79,70,229,0.25)] hover:scale-110 active:scale-95'
+          }`}
+          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Theme`}
+          aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Theme`}
+        >
+          {/* Subtle pulse / aura background */}
+          <span
+            className={`absolute -inset-1 rounded-full opacity-40 animate-pulse pointer-events-none ${
+              theme === 'dark' ? 'bg-amber-400/20' : 'bg-indigo-500/20'
+            }`}
+          />
+
+          {/* Icon with smooth rotate transition */}
+          {theme === 'dark' ? (
+            <Sun className="w-6 h-6 text-amber-400 transition-transform duration-500 group-hover:rotate-90 group-hover:scale-110 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+          ) : (
+            <Moon className="w-6 h-6 text-indigo-600 transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110 drop-shadow-[0_0_6px_rgba(79,70,229,0.4)]" />
+          )}
+
+          {/* Hover Tooltip Capsule */}
+          <span className="pointer-events-none absolute bottom-full mb-3 right-0 scale-0 group-hover:scale-100 transition-all duration-200 origin-bottom-right px-3 py-1.5 rounded-xl text-xs font-mono font-bold whitespace-nowrap shadow-xl bg-cyber-950 text-slate-100 border border-cyber-700">
+            {theme === 'dark' ? '☀️ Switch to Light Mode' : '🌙 Switch to Dark Mode'}
+          </span>
+        </button>
+      </div>
 
       <style>{`
         @keyframes slide-in {
