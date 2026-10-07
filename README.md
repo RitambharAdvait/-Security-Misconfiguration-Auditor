@@ -7,6 +7,7 @@
 [![CIS Benchmark](https://img.shields.io/badge/CIS%20Benchmark-Windows%2011%20v2.0.0-blue.svg)](https://www.cisecurity.org)
 [![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-v14%20Enterprise-red.svg)](https://attack.mitre.org)
 [![RFC 8785](https://img.shields.io/badge/Integrity-RFC%208785%20%7C%20RSA--2048-brightgreen.svg)](https://www.rfc-editor.org/rfc/rfc8785)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An automated, high-performance host-level cybersecurity auditor and remediation engine engineered specifically for Windows endpoints (Windows 10/11 & Windows Server).
 
@@ -26,6 +27,7 @@ Inspired by the academic framework **ASArP** (*Automated Security Assessment & A
 - [Installation & Quickstart](#-installation--quickstart)
 - [REST API Reference](#-rest-api-reference)
 - [Performance & Benchmark Evaluation](#-performance--benchmark-evaluation)
+- [Project Team](#-project-team)
 - [License & Acknowledgements](#-license--acknowledgements)
 
 ---
@@ -314,6 +316,18 @@ Evaluations conducted on an **AMD Ryzen 7 8845HS** (8 cores / 16 threads, 16 GB 
 
 ---
 
+## 👥 Project Team
+
+| # | Team Member | Registration Number |
+| :-: | :--- | :---: |
+| 1 | **Priyal Maheshwari** | `25BCY10089` |
+| 2 | **Ritambhar Advait** | `25BCY10086` |
+| 3 | **Harsh Vardhan Singh** | `25BCY10124` |
+| 4 | **Lakshya Nath** | `25BCY10109` |
+| 5 | **Harshvardhan Singh Rathore** | `25BCY10085` |
+
+---
+
 ## 📜 License & Acknowledgements
 
 - **Research Reference:** Based upon architectural concepts introduced in *"Automated Security Assessment & Audit of Remote Platforms using TCG-SCAP synergies"* (Aslam et al., **Elsevier Journal of Information Security and Applications**, 2015).
@@ -322,4 +336,4 @@ Evaluations conducted on an **AMD Ryzen 7 8845HS** (8 cores / 16 threads, 16 GB 
   - MITRE ATT&CK Enterprise Matrix v14
   - IETF RFC 8785: JSON Canonicalization Scheme (JCS)
   - NIST Special Publication 800-53 (Rev. 5)
-- **License:** Open for academic, research, and enterprise security auditing purposes.
+- **License:** Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for complete terms, permissions, and conditions.
