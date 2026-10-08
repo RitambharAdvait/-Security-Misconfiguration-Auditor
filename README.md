@@ -1,4 +1,4 @@
-# Windows Security Misconfiguration Auditor (ASArP Edition)
+# Automated Host-Based Security Auditor for Windows Environment
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-v0.110+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18%2F19-61DAFB.svg?logo=react&logoColor=black)](https://react.dev)
@@ -9,32 +9,32 @@
 [![RFC 8785](https://img.shields.io/badge/Integrity-RFC%208785%20%7C%20RSA--2048-brightgreen.svg)](https://www.rfc-editor.org/rfc/rfc8785)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An automated, high-performance host-level cybersecurity auditor and remediation engine engineered specifically for Windows endpoints (Windows 10/11 & Windows Server).
+An automated, high-performance host-level cybersecurity auditor and remediation engine engineered specifically for Windows endpoints (Windows 10/11 and Windows Server).
 
 Inspired by the academic framework **ASArP** (*Automated Security Assessment & Audit of Remote Platforms using TCG-SCAP synergies*, Aslam et al., Elsevier JISA 2015), this system replaces heavyweight XML/SCAP parsers and multi-phase query bottlenecks with a **lightweight, parallelized 24-worker inspection engine**, **declarative YAML specifications**, **RFC 8785 canonical cryptographic signing**, and an **interactive enterprise React command center**.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
-- [Overview & Problem Statement](#-overview--problem-statement)
-- [Key Features](#-key-features)
-- [System Architecture](#-system-architecture)
-- [Operational Workflow](#-operational-workflow)
-- [Audited Security Domains & Benchmark Rules](#-audited-security-domains--benchmark-rules)
-- [Repository Structure](#-repository-structure)
-- [Tech Stack](#-tech-stack)
-- [Installation & Quickstart](#-installation--quickstart)
-- [REST API Reference](#-rest-api-reference)
-- [Performance & Benchmark Evaluation](#-performance--benchmark-evaluation)
-- [Project Team](#-project-team)
-- [License & Acknowledgements](#-license--acknowledgements)
+- [Overview and Problem Statement](#overview-and-problem-statement)
+- [Key Features](#key-features)
+- [System Architecture](#system-architecture)
+- [Operational Workflow](#operational-workflow)
+- [Audited Security Domains and Benchmark Rules](#audited-security-domains-and-benchmark-rules)
+- [Repository Structure](#repository-structure)
+- [Tech Stack](#tech-stack)
+- [Installation and Quickstart](#installation-and-quickstart)
+- [REST API Reference](#rest-api-reference)
+- [Performance and Benchmark Evaluation](#performance-and-benchmark-evaluation)
+- [Project Team](#project-team)
+- [License and Acknowledgements](#license-and-acknowledgements)
 
 ---
 
-## 🔍 Overview & Problem Statement
+## Overview and Problem Statement
 
-Modern cyberattacks rarely attempt to break robust mathematical encryption; adversaries routinely exploit simple operational omissions—such as disabled BitLocker, unhardened Remote Desktop (RDP) listeners, deprecated SMBv1 protocols, weak UAC token filtering, or disabled Windows Defender protections.
+Modern cyberattacks rarely attempt to break robust mathematical encryption; adversaries routinely exploit simple operational omissions, such as disabled BitLocker, unhardened Remote Desktop (RDP) listeners, deprecated SMBv1 protocols, weak UAC token filtering, or disabled Windows Defender protections.
 
 ### Limitations of Traditional Solutions (ASArP / OpenSCAP):
 1. **Linux Coupling:** Prior frameworks like ASArP heavily relied on Linux-specific subsystems (`Linux-IMA`, `GRUB-IMA`, `TrouSerS`), leaving Windows workstations unaddressed.
@@ -43,7 +43,7 @@ Modern cyberattacks rarely attempt to break robust mathematical encryption; adve
 4. **Log Tampering Risks:** Unsigned audit logs saved to disk can be covertly manipulated by malicious local actors or malware to falsely claim compliance.
 
 ### The Proposed Solution:
-The **Windows Security Misconfiguration Auditor** bridges this gap:
+The **Automated Host-Based Security Auditor for Windows Environment** bridges this gap:
 - Executes **50 deterministic checks** in parallel (~4.13 s core execution).
 - Embeds **MITRE ATT&CK Enterprise Matrix (v14)** mappings directly in each check.
 - Protects scan artifacts using **RFC 8785 JSON canonicalization** and **RSA-2048 / SHA-256 digital signatures**.
@@ -51,19 +51,19 @@ The **Windows Security Misconfiguration Auditor** bridges this gap:
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **🚀 24-Worker Parallel Execution Engine:** Dispatches non-blocking, isolated PowerShell subprocesses (`-NoProfile -NonInteractive`) across physical/logical cores, querying registry hives, WMI/CIM, and LSA concurrently.
-- **🛡️ 50 CIS Windows 11 Benchmarks:** Covers 19 Critical, 25 High, and 6 Medium controls aligned with CIS Benchmark v2.0.0 and MITRE ATT&CK tactics (T1078, T1021, T1562, T1557, T1068, T1003).
-- **🔐 RFC 8785 & RSA-2048 Cryptographic Attestation:** Canonicalizes findings in memory to enforce deterministic key sorting and signs the payload with RSA-2048/SHA-256 before disk persistence, rendering post-scan file tampering mathematically detectable.
-- **⚡ Automated Remediation Hub:** Compiles detected vulnerabilities into executable PowerShell `.ps1` scripts with structured `try/catch` blocks, progress counters, and elevation verification, alongside 4-column vector PDF playbooks.
-- **📊 Scan Comparison & Drift Analysis:** Side-by-side historical audit diffing evaluating transitions across a 4-state matrix: `REMEDIATED`, `REGRESSED`, `PERSISTENT_FAIL`, and `UNCHANGED_PASS`.
-- **🎛️ Interactive Rule & Benchmark Studio:** Allows real-time policy adjustments via RESTful CRUD endpoints with live PowerShell testing and a 35-check benchmark catalog (CIS, NIST SP 800-53, DISA STIG).
-- **🌗 Command Center UI with Theme Toggle:** High-contrast Enterprise Cyber Dark theme with custom neon HUD animations, alongside an accessible, clean Light Mode accessible via a persistent circular floating toggle.
+- **24-Worker Parallel Execution Engine:** Dispatches non-blocking, isolated PowerShell subprocesses (`-NoProfile -NonInteractive`) across physical/logical cores, querying registry hives, WMI/CIM, and LSA concurrently.
+- **50 CIS Windows 11 Benchmarks:** Covers 19 Critical, 25 High, and 6 Medium controls aligned with CIS Benchmark v2.0.0 and MITRE ATT&CK tactics (T1078, T1021, T1562, T1557, T1068, T1003).
+- **RFC 8785 and RSA-2048 Cryptographic Attestation:** Canonicalizes findings in memory to enforce deterministic key sorting and signs the payload with RSA-2048/SHA-256 before disk persistence, rendering post-scan file tampering mathematically detectable.
+- **Automated Remediation Hub:** Compiles detected vulnerabilities into executable PowerShell `.ps1` scripts with structured `try/catch` blocks, progress counters, and elevation verification, alongside 4-column vector PDF playbooks.
+- **Scan Comparison and Drift Analysis:** Side-by-side historical audit diffing evaluating transitions across a 4-state matrix: `REMEDIATED`, `REGRESSED`, `PERSISTENT_FAIL`, and `UNCHANGED_PASS`.
+- **Interactive Rule and Benchmark Studio:** Allows real-time policy adjustments via RESTful CRUD endpoints with live PowerShell testing and a 35-check benchmark catalog (CIS, NIST SP 800-53, DISA STIG).
+- **Command Center UI with Theme Toggle and About Hub:** Enterprise Cyber Dark and high-contrast Enterprise Light themes with custom HUD gauges, collapsible navigation sidebar (`WIN-SEC AUDITOR`), and an integrated **About Hub** highlighting project architecture, operational problem/solution metrics, and engineering team profiles.
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 The platform follows a decoupled, asynchronous client-server architecture:
 
@@ -74,7 +74,9 @@ The platform follows a decoupled, asynchronous client-server architecture:
 │  │  Executive Overview  │   Security Findings   │   Benchmark Studio     │  │
 │  ├──────────────────────┼───────────────────────┼────────────────────────┤  │
 │  │   Scan Comparison    │   Historical Scans    │   Remediation Hub      │  │
-│  └──────────────────────┴───────────────────────┴────────────────────────┘  │
+│  ├──────────────────────┴───────────────────────┴────────────────────────┤  │
+│  │       Cryptographic Attestation        •        About & Team          │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │ REST API (JSON / HTTP)
                                        ▼
@@ -102,7 +104,7 @@ The platform follows a decoupled, asynchronous client-server architecture:
 
 ---
 
-## 🔄 Operational Workflow
+## Operational Workflow
 
 ```
 STAGE 1: Rule Engine & Manifest Sync
@@ -133,7 +135,7 @@ STAGE 4: Reporting, Drift Analysis & Remediation
 
 ---
 
-## 📋 Audited Security Domains & Benchmark Rules
+## Audited Security Domains and Benchmark Rules
 
 The 50 rules (`WIN-SEC-001` through `WIN-SEC-050`) cover 5 key operational domains:
 
@@ -147,7 +149,7 @@ The 50 rules (`WIN-SEC-001` through `WIN-SEC-050`) cover 5 key operational domai
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 win-security-auditor/
@@ -155,12 +157,14 @@ win-security-auditor/
 │   ├── main.py                     # FastAPI REST API endpoints, routing & CORS
 │   ├── requirements.txt            # Python dependencies (FastAPI, cryptography, etc.)
 │   └── test_api.py                 # API automated endpoint unit tests
+├── benchmarks/
+│   └── catalog.json                # 35-check multi-standard benchmark catalog (CIS, NIST, DISA)
 ├── certs/
 │   ├── asarp_private_key.pem       # RSA-2048 private signing key (PKCS#8)
 │   └── asarp_public_key.pem        # RSA-2048 public certificate for verification
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx                 # Complete React command center & views
+│   │   ├── App.jsx                 # Complete React command center, views & About Hub
 │   │   ├── index.css               # Cyberpunk & enterprise light theme styling
 │   │   └── main.jsx                # Client application bootstrap
 │   ├── index.html                  # Single-page application root
@@ -168,21 +172,25 @@ win-security-auditor/
 │   ├── tailwind.config.js          # Extended color palette & custom themes
 │   └── vite.config.js              # Vite bundler configuration
 ├── scans/                          # Cryptographically sealed JSON scan artifacts
+├── scripts/
+│   └── generate_report.py          # Corporate executive documentation synthesis
 ├── templates/
 │   └── report_template.html        # Jinja2 HTML report template fallback
 ├── auditor.py                      # Core Python audit engine & 24-worker ThreadPool
 ├── certifier.py                    # RFC 8785 canonicalization & RSA-2048 signing module
+├── LICENSE                         # MIT Open Source License
 ├── rules.yaml                      # Active declarative 50-rule benchmark specification
 ├── rules_default.yaml              # Factory fallback benchmark specification
+├── start_dashboard.bat             # 1-Click launcher automation script
 └── README.md                       # Comprehensive system documentation
 ```
 
 ---
 
-## 💻 Tech Stack
+## Tech Stack
 
-### Backend & Core Audit Engine
-- **Language & Runtime:** Python 3.12 / 3.13 (64-bit)
+### Backend and Core Audit Engine
+- **Language and Runtime:** Python 3.12 / 3.13 (64-bit)
 - **Web API Framework:** FastAPI v0.110+ (Starlette, Pydantic v2 validation)
 - **ASGI Server:** Uvicorn v0.29+
 - **Concurrency:** `concurrent.futures.ThreadPoolExecutor` (24 parallel workers)
@@ -191,19 +199,19 @@ win-security-auditor/
 
 ### Frontend Command Center
 - **UI Framework:** React 18 / 19 (Functional Components, Custom Hooks)
-- **Bundler & Dev Server:** Vite 8.3+
-- **Styling:** Tailwind CSS 3.4+ with custom Cyber Dark / Enterprise Light themes
+- **Bundler and Dev Server:** Vite 8.3+
+- **Styling:** Tailwind CSS 3.4+ with custom Cyber Dark and Enterprise Light themes
 - **Icons:** Lucide React
 - **HTTP Client:** Axios v1.6+
 - **Vector Document Synthesis:** jsPDF v2.5+ & jspdf-autotable v3.8+ (Client-side PDF compilation)
 
 ---
 
-## 🚀 Installation & Quickstart
+## Installation and Quickstart
 
 ### Prerequisites
 - **Operating System:** Windows 10, Windows 11, or Windows Server 2019/2022
-- **Privileges:** Administrator privileges required for live audit mode (registry & WMI reads)
+- **Privileges:** Administrator privileges required for live audit mode (registry and WMI reads)
 - **PowerShell:** Version 5.1+ (default on Windows 10/11)
 - **Python:** Version 3.12 or 3.13 (64-bit)
 - **Node.js:** Version 18.x or 20.x+ with npm
@@ -246,23 +254,31 @@ npm run build
 
 ### Step 3: Launch Services
 
-#### Option A: Run Full Web Dashboard (Recommended)
+#### Option A: One-Click Startup (Recommended)
+
+Run the automated startup batch file from an **Elevated PowerShell** or by double-clicking:
+
+```powershell
+.\start_dashboard.bat
+```
+This automatically verifies the virtual environment, binds FastAPI, and opens the compiled enterprise dashboard at **`http://localhost:8000`**.
+
+#### Option B: Developer Mode (Hot-Reloading)
 
 1. **Start the FastAPI Backend (Port 8000):**
    ```powershell
-   # From root C:\win-security-auditor in elevated PowerShell:
    .\venv\Scripts\python.exe -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
-2. **Start the Frontend Dev Server (Port 5173):**
+2. **Start the Vite Frontend Dev Server (Port 5173):**
    ```powershell
-   # In a separate terminal inside frontend/:
+   cd frontend
    npm run dev
    ```
 
-3. Open your browser and navigate to: **`http://localhost:5173`**
+3. Open your browser at **`http://localhost:5173`**.
 
-#### Option B: Run Standalone CLI Terminal Auditor
+#### Option C: Run Standalone CLI Terminal Auditor
 
 You can run the audit engine directly in your terminal without starting the web servers:
 
@@ -276,24 +292,32 @@ python auditor.py
 
 ---
 
-## 📡 REST API Reference
+## REST API Reference
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/health` | Health check endpoint returning API status and framework version. |
+| `GET` | `/api/health` | Health check endpoint returning API operational status, service name, and framework version. |
 | `GET` | `/api/audit?demo={bool}` | Trigger an audit scan. `demo=false` executes a live host audit; `demo=true` runs mock evaluation. |
-| `GET` | `/api/history` | Retrieve chronological scan history list with scores, modes, and attestation seals. |
+| `GET` | `/api/history?limit={n}` | Retrieve chronological scan history list with scores, execution modes, and attestation seals. |
 | `GET` | `/api/results/{scan_id}` | Retrieve complete findings payload for a specific historical audit artifact. |
 | `GET` | `/api/verify/{scan_id}` | Recalculate RFC 8785 canonical hash and verify the RSA-2048 digital signature of a saved audit log. |
-| `GET` | `/api/compare?base_id={id}&target_id={id}` | Perform side-by-side differential analysis between two scan runs (remediated, regressed, latency deltas). |
-| `GET` | `/api/rules/manage` | Retrieve active rules list from `rules.yaml` with custom/builtin source status. |
+| `POST` | `/api/verify` | Verify an arbitrary uploaded JSON scan record against the TCB-sealed public key. |
+| `GET` | `/api/compare?base_id={id}&target_id={id}` | Perform side-by-side differential drift analysis between two scans (remediated, regressed, deltas). |
+| `GET` | `/api/rules` | Retrieve all 50 security rules in standard schema for scanning. |
+| `GET` | `/api/rules/manage` | Retrieve active rules list from `rules.yaml` with custom/builtin status and toggle states. |
+| `POST` | `/api/rules` | Create and register a new custom security rule in `rules.yaml`. |
+| `PUT` | `/api/rules/{rule_id}` | Update existing security rule parameters, severity, or PowerShell query. |
 | `PATCH` | `/api/rules/{rule_id}/toggle` | Enable or disable a specific security rule in future scans. |
+| `DELETE` | `/api/rules/{rule_id}` | Delete a custom or imported rule from `rules.yaml`. |
 | `POST` | `/api/rules/test-query` | Execute and test a live PowerShell inspection snippet in memory before saving. |
 | `POST` | `/api/rules/reset` | Restore `rules.yaml` back to factory default baselines (`rules_default.yaml`). |
+| `GET` | `/api/rules/stats` | Retrieve aggregate counts by category, severity distribution, and active/disabled states. |
+| `GET` | `/api/benchmarks/catalog` | Browse pre-configured catalog of 35 security controls across CIS, NIST SP 800-53, and DISA STIG. |
+| `POST` | `/api/benchmarks/import/{catalog_id}` | One-click import and activation of an industry benchmark check into the active rule set. |
 
 ---
 
-## ⚡ Performance & Benchmark Evaluation
+## Performance and Benchmark Evaluation
 
 Evaluations conducted on an **AMD Ryzen 7 8845HS** (8 cores / 16 threads, 16 GB RAM) running Windows 11 Enterprise:
 
@@ -316,19 +340,19 @@ Evaluations conducted on an **AMD Ryzen 7 8845HS** (8 cores / 16 threads, 16 GB 
 
 ---
 
-## 👥 Project Team
+## Project Team
 
-| # | Team Member | Registration Number |
-| :-: | :--- | :---: |
-| 1 | **Priyal Maheshwari** | `25BCY10089` |
-| 2 | **Ritambhar Advait** | `25BCY10086` |
-| 3 | **Harsh Vardhan Singh** | `25BCY10124` |
-| 4 | **Lakshya Nath** | `25BCY10109` |
-| 5 | **Harshvardhan Singh Rathore** | `25BCY10085` |
+| # | Team Member | Registration Number | Contact & Profiles |
+| :-: | :--- | :---: | :--- |
+| 1 | **Priyal Maheshwari** | `25BCY10089` | [Email](mailto:primaheshwari20@gmail.com) • [LinkedIn](https://www.linkedin.com/in/priyal-maheshwari-4344b93ba) |
+| 2 | **Ritambhar Advait** | `25BCY10086` | [Email](mailto:ritambharadvait2007@gmail.com) • [LinkedIn](https://www.linkedin.com/in/ritambhar-advait-0b3b2137b) |
+| 3 | **Harsh Vardhan Singh** | `25BCY10124` | [Email](mailto:harshranita123@gmail.com) • [LinkedIn](https://www.linkedin.com/in/harsh-vardhan-singh-918889380) |
+| 4 | **Lakshya Nath** | `25BCY10109` | [Email](mailto:lakshyanath19@gmail.com) • [LinkedIn](https://www.linkedin.com/in/lakshya-nath-501441398) |
+| 5 | **Harshvardhan Rathore** | `25BCY10085` | [Email](mailto:harshvardhan2007ak@gmail.com) • [LinkedIn](https://www.linkedin.com/in/harshvardhan-singh-rathore-3444b5375/) |
 
 ---
 
-## 📜 License & Acknowledgements
+## License and Acknowledgements
 
 - **Research Reference:** Based upon architectural concepts introduced in *"Automated Security Assessment & Audit of Remote Platforms using TCG-SCAP synergies"* (Aslam et al., **Elsevier Journal of Information Security and Applications**, 2015).
 - **Standards Implemented:**

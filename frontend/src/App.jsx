@@ -9,7 +9,7 @@ import {
   GitCompare, ArrowUpRight, ArrowDownRight, Zap, TrendingUp, TrendingDown,
   Sliders, Plus, Edit2, Trash2, RotateCcw, BookOpen, Layers, Terminal, Sparkles, Filter, Database, FileText,
   LayoutDashboard, ChevronLeft, ChevronRight, FileCode, CheckSquare, Award, Menu, PanelLeftClose, PanelLeftOpen,
-  Sun, Moon
+  Sun, Moon, Info, Users, Cpu, FileCheck, Mail
 } from 'lucide-react'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -3228,6 +3228,352 @@ function PlaybooksView({ auditData, onDownloadPdf, onDownloadPs1 }) {
   )
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ABOUT VIEW COMPONENT (Executive Problem/Solution, Tech Pillars & Team)
+// ═══════════════════════════════════════════════════════════════════════════
+function AboutView({ theme, auditData }) {
+  const isLight = theme === 'light'
+  const [copiedEmail, setCopiedEmail] = useState(null)
+
+  const handleEmailClick = (email) => {
+    // Open Gmail web compose in a new tab (reliable in all browsers)
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`
+    window.open(gmailUrl, '_blank', 'noopener,noreferrer')
+    
+    // Also copy to clipboard with a subtle feedback notification
+    try {
+      navigator.clipboard.writeText(email)
+      setCopiedEmail(email)
+      setTimeout(() => setCopiedEmail(null), 2500)
+    } catch (e) {}
+  }
+
+  const teamMembers = [
+    {
+      name: 'Priyal Maheshwari',
+      roll: '25BCY10089',
+      email: 'primaheshwari20@gmail.com',
+      linkedin: 'https://www.linkedin.com/in/priyal-maheshwari-4344b93ba?utm_source=share_via&utm_content=profile&utm_medium=member_android',
+      initials: 'PM'
+    },
+    {
+      name: 'Ritambhar Advait',
+      roll: '25BCY10086',
+      email: 'ritambharadvait2007@gmail.com',
+      linkedin: 'https://www.linkedin.com/in/ritambhar-advait-0b3b2137b',
+      initials: 'RA'
+    },
+    {
+      name: 'Harsh Vardhan Singh',
+      roll: '25BCY10124',
+      email: 'harshranita123@gmail.com',
+      linkedin: 'https://www.linkedin.com/in/harsh-vardhan-singh-918889380?utm_source=share_via&utm_content=profile&utm_medium=member_android',
+      initials: 'HV'
+    },
+    {
+      name: 'Lakshya Nath',
+      roll: '25BCY10109',
+      email: 'lakshyanath19@gmail.com',
+      linkedin: 'https://www.linkedin.com/in/lakshya-nath-501441398?utm_source=share_via&utm_content=profile&utm_medium=member_android',
+      initials: 'LN'
+    },
+    {
+      name: 'Harshvardhan Rathore',
+      roll: '25BCY10085',
+      email: 'harshvardhan2007ak@gmail.com',
+      linkedin: 'https://www.linkedin.com/in/harshvardhan-singh-rathore-3444b5375/',
+      initials: 'HR'
+    }
+  ]
+
+  const pillars = [
+    {
+      icon: Zap,
+      title: '24-Worker Parallel Engine',
+      metric: '~4.13s Scan Latency',
+      desc: 'Dispatches isolated non-blocking PowerShell threads querying registry hives and LSA concurrently, eliminating legacy 40-minute bottlenecks.'
+    },
+    {
+      icon: Lock,
+      title: 'RFC 8785 Anti-TOCTOU Sealing',
+      metric: 'RSA-2048 & SHA-256',
+      desc: 'Canonicalizes JSON findings directly in memory and signs audit records with local keypairs to detect any post-scan log tampering mathematically.'
+    },
+    {
+      icon: Shield,
+      title: '50 CIS & ATT&CK Benchmarks',
+      metric: '88% High/Critical Scope',
+      desc: '100% deterministic, zero-hallucination checks spanning Credential Guard, UAC, SMBv1, Defender, BitLocker, and lateral movement vectors.'
+    },
+    {
+      icon: Terminal,
+      title: 'Automated Remediation Engine',
+      metric: 'One-Click .ps1 & PDF',
+      desc: 'Compiles discovered vulnerabilities into elevated executable PowerShell mitigation scripts and executive compliance audit playbooks.'
+    }
+  ]
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* 1. Header Banner & Identity */}
+      <div className={`p-6 sm:p-8 rounded-2xl border transition-all relative overflow-hidden ${
+        isLight
+          ? 'bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-white border-blue-200 shadow-sm'
+          : 'bg-gradient-to-r from-cyber-900/90 via-cyber-850/80 to-cyber-950/90 border-cyber-700/80 shadow-2xl'
+      }`}>
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-semibold border ${
+              isLight
+                ? 'bg-blue-100/80 text-blue-800 border-blue-300'
+                : 'bg-cyber-950/60 text-neon-green border-neon-green/40'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-blue-600' : 'bg-neon-green animate-pulse'}`} />
+              <span>PROJECT OVERVIEW & ARCHITECTURE</span>
+            </div>
+            <h1 className={`text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3 ${
+              isLight ? 'text-slate-900' : 'text-white'
+            }`}>
+              <span>WIN-SEC AUDITOR</span>
+              <span className={`text-xs font-mono font-semibold px-2.5 py-1 rounded-lg border ${
+                isLight
+                  ? 'bg-blue-100 text-blue-700 border-blue-300'
+                  : 'bg-cyber-800 text-neon-mint border-cyber-600'
+              }`}>
+                ASArP Edition
+              </span>
+            </h1>
+            <p className={`text-sm sm:text-base max-w-3xl leading-relaxed ${
+              isLight ? 'text-slate-700 font-medium' : 'text-slate-300'
+            }`}>
+              An automated, high-performance host-level security verification and remediation engine built for Windows endpoints. It eliminates manual auditing overhead and protects audit trails against Time-of-Check to Time-of-Use (TOCTOU) log tampering.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap md:flex-col gap-2 shrink-0">
+            <div className={`px-3.5 py-2 rounded-xl border font-mono text-xs ${
+              isLight
+                ? 'bg-white border-slate-300 shadow-sm'
+                : 'bg-cyber-950/80 border-cyber-750'
+            }`}>
+              <span className={`block text-[10px] uppercase font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Standard</span>
+              <span className={`font-bold ${isLight ? 'text-blue-700' : 'text-neon-green'}`}>CIS Windows 11 v2.0.0</span>
+            </div>
+            <div className={`px-3.5 py-2 rounded-xl border font-mono text-xs ${
+              isLight
+                ? 'bg-white border-slate-300 shadow-sm'
+                : 'bg-cyber-950/80 border-cyber-750'
+            }`}>
+              <span className={`block text-[10px] uppercase font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Matrix</span>
+              <span className={`font-bold ${isLight ? 'text-indigo-700' : 'text-neon-mint'}`}>MITRE ATT&CK v14</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Concise Problem vs. Solution Card */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* The Problem */}
+        <div className={`p-6 rounded-2xl border transition-all ${
+          isLight
+            ? 'bg-rose-50/80 border-rose-300 text-slate-900 shadow-sm'
+            : 'bg-cyber-900/80 border-rose-500/30 text-slate-200'
+        }`}>
+          <div className="flex items-center gap-2.5 mb-4 text-rose-600">
+            <AlertTriangle className="w-5 h-5 shrink-0" />
+            <h3 className="font-bold text-base tracking-wide uppercase font-mono">The Operational Problem</h3>
+          </div>
+          <ul className="space-y-3 text-xs sm:text-sm leading-relaxed">
+            <li className="flex items-start gap-2.5">
+              <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <span><strong className={isLight ? 'text-rose-950' : 'text-white'}>Adversaries Exploit Defaults:</strong> Attackers routinely exploit basic host omissions (SMBv1, disabled Defender, weak UAC, plaintext WDigest) rather than breaking math encryption.</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <span><strong className={isLight ? 'text-rose-950' : 'text-white'}>Slow & Manual Audits:</strong> Manual checks are error-prone, while traditional SCAP/OVAL scanners take up to <strong>40 minutes</strong> and yield unactionable static reports.</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <span><strong className={isLight ? 'text-rose-950' : 'text-white'}>Audit Log Vulnerability (TOCTOU):</strong> Plaintext scan logs saved to disk can be altered by compromised local accounts or attackers to falsely fabricate compliance.</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* The Solution */}
+        <div className={`p-6 rounded-2xl border transition-all ${
+          isLight
+            ? 'bg-emerald-50/80 border-emerald-300 text-slate-900 shadow-sm'
+            : 'bg-cyber-900/80 border-neon-green/30 text-slate-200'
+        }`}>
+          <div className={`flex items-center gap-2.5 mb-4 ${isLight ? 'text-emerald-700' : 'text-neon-green'}`}>
+            <CheckCircle className="w-5 h-5 shrink-0" />
+            <h3 className="font-bold text-base tracking-wide uppercase font-mono">How Our Auditor Solves It</h3>
+          </div>
+          <ul className="space-y-3 text-xs sm:text-sm leading-relaxed">
+            <li className="flex items-start gap-2.5">
+              <Check className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-emerald-600' : 'text-neon-green'}`} />
+              <span><strong className={isLight ? 'text-emerald-950' : 'text-white'}>Zero-Hallucination Determinism:</strong> Runs 50 verified host controls directly against Registry hives and LSA with 100% mathematical consistency.</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <Check className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-emerald-600' : 'text-neon-green'}`} />
+              <span><strong className={isLight ? 'text-emerald-950' : 'text-white'}>Ultra-Fast Scanning:</strong> A 24-worker parallel execution pipeline compresses scanning time down to <strong>~4–8 seconds</strong>.</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <Check className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-emerald-600' : 'text-neon-green'}`} />
+              <span><strong className={isLight ? 'text-emerald-950' : 'text-white'}>Cryptographic Tamper-Evidence:</strong> Every audit is sealed via RFC 8785 JSON canonicalization and RSA-2048 signing, making single-byte edits immediately detectable.</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <Check className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-emerald-600' : 'text-neon-green'}`} />
+              <span><strong className={isLight ? 'text-emerald-950' : 'text-white'}>Actionable Remediation:</strong> Auto-generates ready-to-run elevated PowerShell scripts (<code className={`font-mono text-xs px-1.5 py-0.5 rounded border ${isLight ? 'bg-white text-emerald-800 border-emerald-300' : 'bg-cyber-950 text-neon-mint border-cyber-700'}`}>.ps1</code>) and PDF compliance playbooks.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* 3. Core Technical Architecture & Approaches (4 Cards) */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className={`text-base sm:text-lg font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            <Cpu className={`w-5 h-5 ${isLight ? 'text-blue-600' : 'text-neon-green'}`} />
+            <span>Technical Approaches & Pillars</span>
+          </h2>
+          <span className={`text-xs font-mono ${isLight ? 'text-slate-600 font-semibold' : 'text-slate-400'}`}>4 Architecture Modules</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {pillars.map((p, idx) => {
+            const Icon = p.icon
+            return (
+              <div
+                key={idx}
+                className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                  isLight
+                    ? 'bg-white border-slate-300 shadow-sm hover:border-blue-500 hover:shadow-md'
+                    : 'bg-cyber-900/90 border-cyber-750 hover:border-neon-green/50 hover:shadow-[0_0_15px_rgba(0,255,157,0.1)]'
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
+                      isLight
+                        ? 'bg-blue-50 border-blue-200 text-blue-600'
+                        : 'bg-cyber-950 border-cyber-700 text-neon-green'
+                    }`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${
+                      isLight
+                        ? 'bg-blue-50 text-blue-800 border-blue-300'
+                        : 'bg-cyber-950 text-neon-mint border-cyber-700'
+                    }`}>
+                      {p.metric}
+                    </span>
+                  </div>
+                  <h4 className={`font-bold text-sm ${isLight ? 'text-slate-900' : 'text-slate-100'}`}>{p.title}</h4>
+                  <p className={`text-xs leading-relaxed ${isLight ? 'text-slate-600 font-normal' : 'text-slate-400'}`}>
+                    {p.desc}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* 4. Project Engineering Team */}
+      <div className={`p-6 sm:p-7 rounded-2xl border transition-all ${
+        isLight
+          ? 'bg-white border-slate-300 shadow-sm'
+          : 'bg-cyber-900/90 border-cyber-750 shadow-xl'
+      }`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+          <div className="flex items-center gap-2.5">
+            <Users className={`w-5 h-5 ${isLight ? 'text-blue-600' : 'text-neon-green'}`} />
+            <h2 className={`text-base sm:text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Project Engineering Team</h2>
+          </div>
+          <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border inline-block w-fit ${
+            isLight
+              ? 'bg-slate-100 text-slate-800 border-slate-300'
+              : 'bg-cyber-950 text-neon-mint border-cyber-700'
+          }`}>
+            VIT Bhopal University
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+          {teamMembers.map((member, i) => (
+            <div
+              key={i}
+              className={`p-4 rounded-xl border flex flex-col justify-between transition-all group ${
+                isLight
+                  ? 'bg-slate-50 border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 shadow-sm'
+                  : 'bg-cyber-950/80 border-cyber-750 hover:border-neon-green/40 hover:bg-cyber-950'
+              }`}
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className={`w-8 h-8 rounded-lg border flex items-center justify-center font-mono font-bold text-xs shadow-sm ${
+                    isLight
+                      ? 'bg-white text-blue-700 border-blue-200'
+                      : 'bg-cyber-850 text-neon-green border-cyber-700'
+                  }`}>
+                    {member.initials}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {member.email && (
+                      <button
+                        onClick={() => handleEmailClick(member.email)}
+                        title={`Click to email via Gmail or copy: ${member.email}`}
+                        className={`p-1.5 rounded-lg border transition relative flex items-center justify-center ${
+                          copiedEmail === member.email
+                            ? (isLight ? 'bg-emerald-100 text-emerald-800 border-emerald-400' : 'bg-neon-green/20 text-neon-green border-neon-green/80 shadow-[0_0_8px_rgba(0,255,157,0.4)]')
+                            : (isLight ? 'bg-white hover:bg-slate-100 text-slate-600 hover:text-blue-700 border-slate-300' : 'bg-cyber-850 hover:bg-cyber-800 text-slate-400 hover:text-neon-mint border-cyber-750 hover:border-neon-green/40')
+                        }`}
+                      >
+                        {copiedEmail === member.email ? (
+                          <Check className={`w-3.5 h-3.5 ${isLight ? 'text-emerald-700' : 'text-neon-green'}`} />
+                        ) : (
+                          <Mail className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    )}
+                    {member.linkedin && (
+                      <a
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="LinkedIn Profile"
+                        className={`p-1.5 rounded-lg border transition flex items-center justify-center ${
+                          isLight
+                            ? 'bg-white hover:bg-blue-50 text-slate-600 hover:text-blue-600 border-slate-300 hover:border-blue-400'
+                            : 'bg-cyber-850 hover:bg-cyber-800 text-slate-400 hover:text-blue-400 border-cyber-750 hover:border-blue-500/40'
+                        }`}
+                      >
+                        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                          <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.6 1.6 0 0 0-1.6 1.6 1.6 1.6 0 0 0 1.6 1.6 1.6 1.6 0 0 0 1.6-1.6 1.6 1.6 0 0 0-1.6-1.6Z" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <div className={`font-bold text-xs sm:text-sm truncate ${isLight ? 'text-slate-900' : 'text-slate-100'}`} title={member.name}>
+                    {member.name}
+                  </div>
+                  <div className={`font-mono text-xs font-semibold mt-0.5 ${isLight ? 'text-blue-700' : 'text-neon-mint'}`}>
+                    {member.roll}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('asarp-theme') || 'dark'
@@ -3793,6 +4139,11 @@ $failCount = 0
       id: 'playbooks',
       label: 'Remediation Hub',
       icon: FileCode
+    },
+    {
+      id: 'about',
+      label: 'About',
+      icon: Info
     }
   ]
 
@@ -3831,7 +4182,7 @@ $failCount = 0
               {!sidebarCollapsed && (
                 <div className="min-w-0 flex-1">
                   <div className="font-extrabold text-sm text-white tracking-wide truncate flex items-center gap-1.5">
-                    <span>ASArP AUDITOR</span>
+                    <span>WIN-SEC AUDITOR</span>
                   </div>
                   <div className="text-[11px] font-mono text-neon-mint truncate flex items-center gap-1 font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-neon-green inline-block animate-pulse"></span>
@@ -4581,6 +4932,14 @@ $failCount = 0
               auditData={auditData}
               onDownloadPdf={downloadFixScriptPdf}
               onDownloadPs1={downloadFixScriptPs1}
+            />
+          )}
+
+          {/* VIEW 8: ABOUT PROJECT & ARCHITECTURE */}
+          {currentView === 'about' && (
+            <AboutView
+              theme={theme}
+              auditData={auditData}
             />
           )}
         </main>

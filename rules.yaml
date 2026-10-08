@@ -1,14 +1,16 @@
 - rule_id: WIN-SEC-001
   category: Lateral Movement
   description: Ensure SMBv1 protocol is disabled (used by WannaCry/EternalBlue)
-  ps_command: Get-SmbServerConfiguration | Select-Object EnableSMB1Protocol | ConvertTo-Json
-  target_key: EnableSMB1Protocol
-  expected_value: false
+  ps_command: Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters'
+    | Select-Object SMB1 | ConvertTo-Json
+  target_key: SMB1
+  expected_value: 0
   severity: CRITICAL
   risk_explanation: SMBv1 is an insecure, legacy protocol vulnerable to remote code
     execution exploits like EternalBlue (used in the WannaCry ransomware attack).
     It lacks modern encryption and pre-authentication integrity checks.
-  remediation_command: Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force
+  remediation_command: Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters'
+    -Name 'SMB1' -Value 0 -Type DWord
   cis_reference: CIS Microsoft Windows 11 v2.0.0 - 18.3.4
   mitre_tactic: Lateral Movement
   mitre_technique: T1021.002
@@ -91,8 +93,9 @@
 - rule_id: WIN-SEC-006
   category: Network Security
   description: Ensure Windows Firewall is enabled for the Domain profile
-  ps_command: Get-NetFirewallProfile -Name Domain | Select-Object Enabled | ConvertTo-Json
-  target_key: Enabled
+  ps_command: Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\DomainProfile'
+    | Select-Object EnableFirewall | ConvertTo-Json
+  target_key: EnableFirewall
   expected_value: 1
   severity: HIGH
   risk_explanation: Disabling host-based firewalls for domain connections removes
@@ -348,16 +351,16 @@
 - rule_id: WIN-SEC-019
   category: Lateral Movement
   description: Ensure SMB client requires security signature
-  ps_command: Get-SmbClientConfiguration | Select-Object RequireSecuritySignature
-    | ConvertTo-Json
+  ps_command: Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters'
+    | Select-Object RequireSecuritySignature | ConvertTo-Json
   target_key: RequireSecuritySignature
-  expected_value: true
+  expected_value: 1
   severity: HIGH
   risk_explanation: Unsigned SMB traffic is vulnerable to Man-in-the-Middle (MitM)
     packet tampering and SMB Relay attacks, allowing adversaries to impersonate clients
     and execute commands on other domain systems.
-  remediation_command: Set-SmbClientConfiguration -RequireSecuritySignature $true
-    -Force
+  remediation_command: Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters'
+    -Name 'RequireSecuritySignature' -Value 1 -Type DWord
   cis_reference: CIS Microsoft Windows 11 v2.0.0 - 18.3.5
   mitre_tactic: Lateral Movement
   mitre_technique: T1021.002
@@ -625,16 +628,16 @@
   category: Lateral Movement
   description: Ensure SMB server requires digital security signatures on all incoming
     connections
-  ps_command: Get-SmbServerConfiguration | Select-Object RequireSecuritySignature
-    | ConvertTo-Json
+  ps_command: Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters'
+    | Select-Object RequireSecuritySignature | ConvertTo-Json
   target_key: RequireSecuritySignature
-  expected_value: true
+  expected_value: 1
   severity: CRITICAL
   risk_explanation: Enforcing SMB server signing blocks SMB Relay attacks (e.g., NTLM
     relaying via ntlmrelayx), where captured network hashes are forwarded to execute
     commands on administrative SMB shares (C$, ADMIN$).
-  remediation_command: Set-SmbServerConfiguration -RequireSecuritySignature $true
-    -Force
+  remediation_command: Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters'
+    -Name 'RequireSecuritySignature' -Value 1 -Type DWord
   cis_reference: CIS Microsoft Windows 11 v2.0.0 - 2.3.11.1
   mitre_tactic: Lateral Movement
   mitre_technique: T1021.002

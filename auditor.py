@@ -16,12 +16,12 @@ console = Console()
 SEVERITY_WEIGHT = {"CRITICAL": 3, "HIGH": 2, "MEDIUM": 1, "LOW": 1}
 
 DEMO_RESPONSES = {
-    "WIN-SEC-001": {"EnableSMB1Protocol": True},
+    "WIN-SEC-001": {"SMB1": 0},
     "WIN-SEC-002": {"EnableLUA": 1},
     "WIN-SEC-003": {"UserAuthentication": 0},
     "WIN-SEC-004": {"RealTimeProtectionEnabled": True},
     "WIN-SEC-005": {"Enabled": False},
-    "WIN-SEC-006": {"Enabled": 1},
+    "WIN-SEC-006": {"EnableFirewall": 1},
     "WIN-SEC-007": {"RunAsPPL": None},
     "WIN-SEC-008": {"ExecutionPolicy": "RemoteSigned"},
     "WIN-SEC-009": {"NoAutoUpdate": 0},
@@ -34,7 +34,7 @@ DEMO_RESPONSES = {
     "WIN-SEC-016": {"Enabled": 1},
     "WIN-SEC-017": {"EnableScriptBlockLogging": 0},
     "WIN-SEC-018": {"Enabled": False},
-    "WIN-SEC-019": {"RequireSecuritySignature": False},
+    "WIN-SEC-019": {"RequireSecuritySignature": 0},
     "WIN-SEC-020": {"Status": "Running"},
     "WIN-SEC-021": {"Enabled": 0},
     "WIN-SEC-022": {"NoLMHash": 1},
@@ -48,7 +48,7 @@ DEMO_RESPONSES = {
     "WIN-SEC-030": {"EnableVirtualization": 1},
     "WIN-SEC-031": {"PromptOnSecureDesktop": 1},
     "WIN-SEC-032": {"ValidateAdminCodeSignatures": 0},
-    "WIN-SEC-033": {"RequireSecuritySignature": True},
+    "WIN-SEC-033": {"RequireSecuritySignature": 1},
     "WIN-SEC-034": {"LimitBlankPasswordUse": 1},
     "WIN-SEC-035": {"Status": "Stopped"},
     "WIN-SEC-036": {"AllowBasic": 0},
@@ -126,6 +126,7 @@ def run_powershell_demo(rule_id: str, rule: dict = None):
 # If an administrator configures the registry key live, the live value is audited.
 # ---------------------------------------------------------------------------
 GPO_UNCONFIGURED_DEFAULTS = {
+    "WIN-SEC-001": 0,
     "WIN-SEC-009": 0,
     "WIN-SEC-011": 0,
     "WIN-SEC-012": 0,
